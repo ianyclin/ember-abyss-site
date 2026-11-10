@@ -30,8 +30,8 @@ def page(name, body, up):
 <meta name="theme-color" content="#0c0a09">
 <link rel="icon" href="{up}img/favicon-32.png" sizes="32x32">
 <link rel="apple-touch-icon" href="{up}img/apple-touch-icon.png">
-<link rel="stylesheet" href="{up}style.css">
-<script src="{up}lang.js"></script>
+<link rel="stylesheet" href="{up}style.css?v=3">
+<script src="{up}lang.js?v=3"></script>
 </head>
 <body>
 <header class="top"><div class="wrap">
@@ -74,7 +74,7 @@ INDEX = f'''<div class="hero"><img src="img/hero.jpg" alt="" width="1600" height
 </section>
 <section>
 <h2>{L("燈城", "Lamp City", "灯城")}</h2>
-{L("百年來第一次，燈城有了光。可是還有很多街巷是暗的。", "For the first time in a hundred years, Lamp City has light. But many of its streets are still dark.", "百年ぶりに、灯城に光が戻った。けれど、まだ暗い通りがたくさんある。", "p class=\"lead\"")}
+{L("百年來第一次，燈城有了光。可是大部分的街巷還是暗的，等著你帶回餘燼，一區一區點亮。", "For the first time in a hundred years, Lamp City has light. But most of its streets are still dark, waiting for the embers you bring home.", "百年ぶりに、灯城に光が戻った。けれど通りの多くはまだ暗く、あなたが持ち帰る残り火を待っている。", "p class=\"lead\"")}
 <figure><img class="wide" src="img/city.jpg" alt="" loading="lazy" width="1024" height="576"></figure>
 </section>
 </main>'''

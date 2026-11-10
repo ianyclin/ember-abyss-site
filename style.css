@@ -41,10 +41,10 @@ h2{font-size:clamp(24px,4.5vw,32px);line-height:1.3;color:var(--ember);margin:0 
 .feats li{background:var(--panel);border:1px solid var(--ash);border-radius:8px;padding:14px 16px}
 .feats b{display:block;color:var(--ember);margin-bottom:2px}
 .shots{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
-.shots img{width:100%;height:auto;aspect-ratio:9/16;object-fit:cover;object-position:50% 0;border-radius:10px;border:1px solid var(--ash);box-shadow:0 8px 30px rgba(0,0,0,.35)}
+.shots img{width:100%;height:auto;border-radius:10px;border:1px solid var(--ash);box-shadow:0 8px 30px rgba(0,0,0,.35)}
 /* 手機：一列左右滑，不要拉成很長一段 */
 @media (max-width:640px){.shots{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:10px;margin:0 -16px;padding:0 16px 8px;scrollbar-width:none}.shots::-webkit-scrollbar{display:none}
- .shots img{flex:0 0 58%;width:58%;scroll-snap-align:center}}
+ .shots img{flex:0 0 46%;width:46%;scroll-snap-align:center}}
 .swipe{display:none;color:var(--dim);font-size:14px;margin:6px 0 0;text-align:center}@media (max-width:640px){.swipe{display:block}}
 .wide{border-radius:10px;border:1px solid var(--ash);box-shadow:0 0 40px var(--glow)}
 figure{margin:0}figcaption{color:var(--dim);font-size:14px;margin-top:8px;text-align:center}
