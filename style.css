@@ -1,0 +1,56 @@
+/* 燼燈深淵網站：固定深色（和遊戲一樣）、餘燼橘；只用系統字型，不載入任何外部資源 */
+:root{
+  --bg:#0c0a09;--panel:#17130f;--ash:#3a2f27;--bone:#efe3cc;--dim:#a8987f;--ember:#ff9a3c;--glow:rgba(255,120,40,.45);
+  --serif:"Noto Serif TC","Noto Serif CJK TC","Songti TC","PMingLiU","Noto Serif JP","Hiragino Mincho ProN","Yu Mincho",Georgia,"Times New Roman",serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{margin:0;background:var(--bg);color:var(--bone);font:17px/1.85 var(--serif);-webkit-text-size-adjust:100%}
+a{color:var(--ember)}
+img{max-width:100%;display:block}
+.wrap{max-width:960px;margin:0 auto;padding:0 16px}
+/* 語言：每段文字有 data-l，只顯示目前語言 */
+[data-l]{display:none}
+html[data-lang="zh-Hant"] [data-l="zh-Hant"],html[data-lang="en"] [data-l="en"],html[data-lang="ja"] [data-l="ja"]{display:revert}
+/* 上方列 */
+.top{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(6px);border-bottom:1px solid var(--ash)}
+.top .wrap{display:flex;align-items:center;gap:12px;min-height:52px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:8px;color:var(--bone);text-decoration:none;font-weight:700;letter-spacing:.08em}
+.brand img{width:28px;height:28px;border-radius:6px}
+.top nav{display:flex;gap:14px;margin-left:auto;font-size:15px}
+.top nav a{color:var(--dim);text-decoration:none}.top nav a:hover,.top nav a[aria-current="page"]{color:var(--ember)}
+.langs{display:flex;gap:4px}
+.langs button{appearance:none;border:1px solid var(--ash);background:transparent;color:var(--dim);border-radius:999px;padding:1px 10px;font:13px/1.6 var(--serif);cursor:pointer}
+.langs button[aria-pressed="true"]{border-color:var(--ember);color:var(--ember)}
+/* 首頁大圖 */
+.hero{position:relative;min-height:min(78vh,720px);display:flex;align-items:flex-start;justify-content:center;text-align:center;overflow:hidden;background:#000}
+.hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:30% 60%}
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.25),rgba(0,0,0,0) 40%,rgba(12,10,9,.9) 96%)}
+.hero .in{position:relative;z-index:1;padding:9vh 16px 0}
+.hero h1{margin:0;font-size:clamp(48px,11vw,104px);line-height:1.05;color:#ff9a3c;text-shadow:0 0 30px rgba(255,120,40,.55);letter-spacing:.04em}
+.hero .en{margin:6px 0 18px;letter-spacing:.45em;font-size:clamp(12px,2.4vw,18px);color:#efe3cc}
+.hero p{margin:0 auto;max-width:30em;color:#efe3cc;text-shadow:0 1px 6px #000}
+.soon{display:inline-flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:22px}
+.soon span{border:1px solid rgba(255,154,60,.6);color:#ffb867;border-radius:999px;padding:3px 14px;font-size:14px;background:rgba(0,0,0,.45)}
+/* 區塊 */
+section{padding:48px 0 8px}
+h2{font-size:clamp(24px,4.5vw,32px);line-height:1.3;color:var(--ember);margin:0 0 12px}
+.lead{color:var(--dim);margin:0 0 20px}
+.feats{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin:0;padding:0;list-style:none}
+.feats li{background:var(--panel);border:1px solid var(--ash);border-radius:8px;padding:14px 16px}
+.feats b{display:block;color:var(--ember);margin-bottom:2px}
+.shots{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.shots img{border-radius:10px;border:1px solid var(--ash);box-shadow:0 8px 30px rgba(0,0,0,.35)}
+@media (max-width:640px){.shots{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.wide{border-radius:10px;border:1px solid var(--ash);box-shadow:0 0 40px var(--glow)}
+figure{margin:0}figcaption{color:var(--dim);font-size:14px;margin-top:8px;text-align:center}
+/* 文件頁（支援、隱私） */
+.doc{padding:32px 0 8px}
+.doc h1{font-size:clamp(28px,6vw,40px);line-height:1.25;color:var(--ember);margin:0 0 4px}
+.doc .sub{color:var(--dim);font-size:14px;margin:0 0 24px}
+.card{background:var(--panel);border:1px solid var(--ash);border-radius:8px;padding:6px 20px 10px;margin:0 0 16px}
+.card h3{font-size:18px;color:var(--ember);margin:14px 0 6px}
+.card ul{padding-left:1.2em;margin:8px 0}.card li{margin:4px 0}
+footer{border-top:1px solid var(--ash);margin-top:56px;padding:24px 0 40px;color:var(--dim);font-size:14px;text-align:center}
+footer a{color:var(--dim)}
