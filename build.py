@@ -47,9 +47,9 @@ def page(name, body, up):
 
 def shots(l):
     alts = {'1-combat': '戰鬥', '4-classes': '選職業', '6-city': '點亮燈城', '7-gallery': '畫廊'}
-    return ''.join(f'<img data-l="{l}" src="img/shot-{l}-{n}.jpg?v=4" alt="{a}" loading="lazy" width="440" height="956">' for n, a in alts.items())
+    return ''.join(f'<img data-l="{l}" src="img/shot-{l}-{n}.jpg?v=5" alt="{a}" loading="lazy" width="440" height="956">' for n, a in alts.items())
 
-INDEX = f'''<div class="hero"><img src="img/hero.jpg?v=4" alt="" width="1600" height="900"><div class="in">
+INDEX = f'''<div class="hero"><img src="img/hero.jpg?v=5" alt="" width="1600" height="900"><div class="in">
 <h1>燼燈深淵</h1><div class="en">EMBERLAMP ABYSS</div>
 {L("提一盞燈，走下十層地窟。<br>燈油燒乾，黑暗就會開始進食。", "Carry a lamp ten floors down.<br>When the oil runs dry, the dark begins to feed.", "灯をひとつ提げて、十層の地窟へ。<br>灯油が尽きれば、闇が喰らいはじめる。", "p")}
 <div class="soon"><span>App Store</span><span>Google Play</span><span>Steam</span><span>{L("即將推出", "Coming soon", "近日公開")}</span></div>
@@ -75,7 +75,7 @@ INDEX = f'''<div class="hero"><img src="img/hero.jpg?v=4" alt="" width="1600" he
 <section>
 <h2>{L("燈城", "Lamp City", "灯城")}</h2>
 {L("百年來第一次，燈城有了光。可是大部分的街巷還是暗的，等著你帶回餘燼，一區一區點亮。", "For the first time in a hundred years, Lamp City has light. But most of its streets are still dark, waiting for the embers you bring home.", "百年ぶりに、灯城に光が戻った。けれど通りの多くはまだ暗く、あなたが持ち帰る残り火を待っている。", "p class=\"lead\"")}
-<figure><img class="wide" src="img/city.jpg?v=4" alt="" loading="lazy" width="1024" height="576"></figure>
+<figure><img class="wide" src="img/city.jpg?v=5" alt="" loading="lazy" width="1024" height="576"></figure>
 </section>
 </main>'''
 
