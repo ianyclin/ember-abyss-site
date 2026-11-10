@@ -70,6 +70,7 @@ INDEX = f'''<div class="hero"><img src="img/hero.jpg" alt="" width="1600" height
 <section>
 <h2>{L("畫面", "Screenshots", "スクリーンショット")}</h2>
 <div class="shots">{shots("zh-Hant")}{shots("en")}{shots("ja")}</div>
+<p class="swipe">{L("← 左右滑動看更多 →", "← Swipe for more →", "← 左右にスワイプ →")}</p>
 </section>
 <section>
 <h2>{L("燈城", "Lamp City", "灯城")}</h2>
