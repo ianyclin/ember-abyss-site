@@ -539,7 +539,8 @@ function discLoad(){if(DISC)return DISC;const r=loadKey(REC_KEY)||{};
  return DISC}
 function discover(k){const D=discLoad();if(D.has(k))return;D.add(k);const r=loadKey(REC_KEY)||{};store(REC_KEY,r)}
 const SLEEP_TIP_KEY='ember-abyss-tip-sleep';let sleepTipped=(()=>{try{return !!localStorage.getItem(SLEEP_TIP_KEY)}catch(e){return false}})();
-function discScan(){if(!G||!P)return;
+let noScan=false;   // 教學放狼前先算一次視野：這時還不要觸發提示與圖鑑
+function discScan(){if(!G||!P||noScan)return;
  for(const m of G.mons)if(m.hp>0&&MON[m.k].big&&!m.buzzed&&vis[idx(m.x,m.y)]){m.buzzed=true;buzz('heavy')}
  {const tm=!G.tutShown&&G.mons.find(m=>m.tut&&m.asleep&&m.hp>0&&vis[idx(m.x,m.y)]);if(tm){G.tutShown=1;tm.autoSeen=1;auto=null;sleepTipped=true;{const r=loadKey(REC_KEY)||{};if(!r.tut){r.tut=1;store(REC_KEY,r)}}try{localStorage.setItem(SLEEP_TIP_KEY,'1')}catch(e){}
   const show=()=>{if(!G||G.over||!tm.asleep||tm.hp<=0)return;if(modalOpen||VIG){setTimeout(show,400);return}openModal(tr('ui_tut_sleep',MON[tm.k].n)+`<div class="row" style="margin-top:14px"><button class="btn hot" id="pgOk" type="button">${L.ui_tut_ok}</button></div>`,false,()=>{$('#pgOk').onclick=()=>{G.tutReady=1;closeModal(true);save()}})};setTimeout(show,350)}}
@@ -682,11 +683,11 @@ const occupied=(x,y)=>!passable(x,y)||!!monAt(x,y)||(P.x===x&&P.y===y)||!!featAt
 
 /* ================= 訊息與效果 ================= */
 const MC={bone:'#efe3cc',dim:'#9a8b77',blood:'#ee6a5c',ember:'#ffab5c',oil:'#e9b949',jade:'#7ed3b6',violet:'#c2a6f0'};
-function msg(t,c='bone'){const last=G.log[G.log.length-1];if(last&&last[0]===t){last[2]=(last[2]||1)+1;renderLog();return}G.log.push([t,c]);if(G.log.length>80)G.log.shift();renderLog()}
-function renderLog(){const el=$('#log');if(!G){el.innerHTML='';return}el.classList.remove('quiet');clearTimeout(renderLog.t);const lv1=G.log.slice(-4);
+function msg(t,c='bone'){const last=G.log[G.log.length-1];if(last&&last[0]===t){last[2]=(last[2]||1)+1;renderLog(true);return}G.log.push([t,c]);if(G.log.length>80)G.log.shift();renderLog(true)}
+function renderLog(fresh){const el=$('#log');if(!G){el.innerHTML='';clearTimeout(renderLog.t);renderLog.t=null;return}const lv1=G.log.slice(-4);   // 只有真的有新訊息（或還沒排過）才展開、重新倒數；走一步沒有新訊息時維持原狀
  // 收成一行的時間跟字數走（中日文每字 0.12 秒、拉丁字母每字 0.05 秒，4.5～15 秒）；有視窗或插圖蓋著時不倒數
  let ms=3000;for(const m of lv1)for(const ch of String(m[0]).replace(/<[^>]*>/g,''))ms+=ch.charCodeAt(0)>0x2e80?120:50;ms=Math.min(15000,Math.max(4500,ms));
- const arm=t=>{renderLog.t=setTimeout(()=>{if(modalOpen||VIG){arm(ms);return}el.classList.add('quiet')},t)};arm(ms);el.innerHTML=lv1.map((m,i)=>`<p style="color:${MC[m[1]]||m[1]};opacity:${0.45+0.55*(i+1)/lv1.length}">${m[0]}${m[2]>1?' ×'+m[2]:''}</p>`).join('')}
+ if(fresh||!renderLog.t&&!el.classList.contains('quiet')){el.classList.remove('quiet');clearTimeout(renderLog.t);const arm=t=>{renderLog.t=setTimeout(()=>{if(modalOpen||VIG){arm(ms);return}renderLog.t=null;el.classList.add('quiet')},t)};arm(ms)}el.innerHTML=lv1.map((m,i)=>`<p style="color:${MC[m[1]]||m[1]};opacity:${0.45+0.55*(i+1)/lv1.length}">${m[0]}${m[2]>1?' ×'+m[2]:''}</p>`).join('')}
 function fxText(x,y,text,color){if(FX.length>400)return;FX.push({k:'t',x:x+.5,y:y+.2,text,color,life:1,max:1})}
 function fxBurst(x,y,color,n=10,spd=3){if(FX.length>400)return;for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2,s=Math.random()*spd+.5;FX.push({k:'p',x:x+.5,y:y+.5,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:.4+Math.random()*.4,max:.8,color,size:Math.random()*.08+.04})}}
 // 技能特效：擴散光環、光束、閃光、大字
@@ -1499,7 +1500,7 @@ function victory(){G.won=true;G.over=true;sfx('level');buzz('win');const g0=galC
 // 第一局的教學：往樓梯的路上放一隻睡得很沉的灰狼。遮燈靠近牠不會醒，偷襲一刀重創；開著燈走到兩格內牠就醒（照樣打得贏，只是比較痛）
 function tutSetup(){const seen0=G.seen.slice();G.seen.fill(1);const path=bfsPath((x,y)=>tile(x,y)===T.STAIRS,false);for(let i=0;i<seen0.length;i++)G.seen[i]=seen0[i];   // 找路時暫時當作整層都看過
  if(!path||path.length<7)return false;
- fov();let pi=-1;for(let i=5;i<=Math.min(path.length-3,14);i++){const[x,y]=path[i];if(!vis[idx(x,y)]&&cheb(P.x,P.y,x,y)>=4){pi=i;break}}   // 靠近一點，但開局站的地方看不到牠
+ noScan=true;fov();noScan=false;let pi=-1;for(let i=5;i<=Math.min(path.length-3,14);i++){const[x,y]=path[i];if(!vis[idx(x,y)]&&cheb(P.x,P.y,x,y)>=4){pi=i;break}}   // 靠近一點，但開局站的地方看不到牠
  if(pi<0)pi=Math.min(path.length-3,8);
  const[x,y]=path[pi];if(occupied(x,y)||featAt(x,y)||trapAt(x,y))return false;
  G.mons=G.mons.filter(m=>cheb(m.x,m.y,x,y)>5&&cheb(m.x,m.y,P.x,P.y)>6);
@@ -1523,7 +1524,8 @@ function newGame(daily,clsId,diff){document.body.classList.remove('ontitle');
  if(U('lore')){const unk=shuffle([...POT.map(k=>k),...SCR.map(k=>k)].filter(k=>!G.known[k]));unk.slice(0,2*U('lore')).forEach(k=>G.known[k]=true)}
  if(G.omen==='fire')G.known.ember=true;
  sortInv();fov();
- msg(tr("t0444",cls.n),'ember');if(daily&&L['cs_'+cls.id+'_in']&&!(r.clsIntro||[]).includes(cls.id))msg(L['cs_'+cls.id+'_in'],'bone');   // 職業開場故事改用視窗顯示一次（之後在手記裡），訊息欄不再每局重複msg(om.id==='calm'?L["t0445"]:tr("t0446",om.n,om.d),'violet');if(G.grave)msg(tr("t0447",NUM[G.grave.depth]),'dim');msg(FLAVOR[1],'dim');
+ msg(tr("t0444",cls.n),'ember');if(daily&&L['cs_'+cls.id+'_in']&&!(r.clsIntro||[]).includes(cls.id))msg(L['cs_'+cls.id+'_in'],'bone');   /* 職業開場故事改用視窗顯示一次（之後在手記裡），訊息欄不再每局重複 */
+ msg(om.id==='calm'?L["t0445"]:tr("t0446",om.n,om.d),'violet');if(G.grave)msg(tr("t0447",NUM[G.grave.depth]),'dim');msg(FLAVOR[1],'dim');
  closeModal(true);banner(L["t0448"],FLOORS[1]);musMode();save();updateHUD();
  // 每個職業第一次下井（每日挑戰除外）：用視窗讀一次這個人的開場故事；第一局排在「燈井」之後當第二頁
  const ci=!daily&&L['cs_'+cls.id+'_in']&&!(r.clsIntro||[]).includes(cls.id);
@@ -1765,7 +1767,7 @@ if(IS_APP&&!isFull())setTimeout(()=>{const i=window.EmberIAP;if(i&&i.owned)i.own
 // App 內（WKWebView）不支援 <a download>：點「儲存圖片」改開系統分享面板，玩家自己選「儲存影像」
 // 圖檔在手指按下時就先讀好（WebKit 可能拒絕「按下去之後才 fetch、隔了一次非同步才 share」）；讀好了就在點擊當下直接開分享面板
 const SHF=new Map();
-function shareFile(a){const h=a.getAttribute('href');if(!SHF.has(h)){const o={};o.p=fetch(h).then(r=>r.blob()).then(b=>o.f=new File([b],a.getAttribute('download')||'emberlamp.jpg',{type:b.type||'image/jpeg'}));SHF.set(h,o)}return SHF.get(h)}
+function shareFile(a){const h=a.getAttribute('href');if(!SHF.has(h)){const o={};o.p=fetch(h).then(r=>r.blob()).then(b=>o.f=new File([b],a.getAttribute('download')||'emberlamp.jpg',{type:b.type||'image/jpeg'})).catch(e=>{SHF.delete(h);throw e});SHF.set(h,o)}return SHF.get(h)}
 if(IS_APP)document.addEventListener('pointerdown',e=>{const a=e.target.closest&&e.target.closest('a[download]');if(a)shareFile(a).p.catch(()=>{})},true);
 if(IS_APP)document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest('a[download]');if(!a)return;e.preventDefault();e.stopPropagation();
  const fail=err=>{if(err&&err.name==='AbortError')return;a.textContent=L.ui_gal_nosave};
@@ -2185,7 +2187,7 @@ addEventListener('keydown',e=>{
  if(k==='i'){e.preventDefault();if(canAct()){selSock=null;invModal()}return}
  if(k==='Escape'){if(canAct())menuModal()}});
 $('#modal').addEventListener('click',e=>{if(e.isTrusted&&performance.now()-modalT0<modalGuard){e.stopPropagation();e.preventDefault()}},true);
-$('#bExplore').onclick=doExplore;$('#bAct').onclick=doInteract;$('#pHood').onclick=toggleHood;$('#bHoodS').onclick=toggleHood;$('#bSkill').onclick=doSkill;$('#bHood').onclick=toggleHood;
+$('#bExplore').onclick=doExplore;$('#bAct').onclick=()=>doInteract();   // 不要把點擊事件當成 self 傳進去$('#pHood').onclick=toggleHood;$('#bHoodS').onclick=toggleHood;$('#bSkill').onclick=doSkill;$('#bHood').onclick=toggleHood;
 $('#bInv').onclick=()=>{if(canAct()){selSock=null;invModal()}};$('#bMenu').onclick=()=>{if(canAct())menuModal()};$('#log').onclick=()=>{if(canAct())logModal()};
 // 方向盤：可長按
 let padT=null,padI=null;
