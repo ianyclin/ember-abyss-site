@@ -539,6 +539,8 @@ function discover(k){const D=discLoad();if(D.has(k))return;D.add(k);const r=load
 const SLEEP_TIP_KEY='ember-abyss-tip-sleep';let sleepTipped=(()=>{try{return !!localStorage.getItem(SLEEP_TIP_KEY)}catch(e){return false}})();
 function discScan(){if(!G||!P)return;
  for(const m of G.mons)if(m.hp>0&&MON[m.k].big&&!m.buzzed&&vis[idx(m.x,m.y)]){m.buzzed=true;buzz('heavy')}
+ {const tm=!G.tutShown&&G.mons.find(m=>m.tut&&m.asleep&&m.hp>0&&vis[idx(m.x,m.y)]);if(tm){G.tutShown=1;tm.autoSeen=1;auto=null;sleepTipped=true;try{localStorage.setItem(SLEEP_TIP_KEY,'1')}catch(e){}
+  const show=()=>{if(!G||G.over||!tm.asleep||tm.hp<=0)return;if(modalOpen||VIG){setTimeout(show,400);return}openModal(tr('ui_tut_sleep',MON[tm.k].n)+`<div class="row" style="margin-top:14px"><button class="btn hot" id="pgOk" type="button">${L.ui_tut_ok}</button></div>`,false,()=>{$('#pgOk').onclick=()=>{G.tutReady=1;closeModal()}})};setTimeout(show,350)}}
  if(!sleepTipped&&G.mons.some(m=>m.hp>0&&m.asleep&&monVisible(m))){sleepTipped=true;try{localStorage.setItem(SLEEP_TIP_KEY,'1')}catch(e){}msg(L.ui_tip_sleep,'dim')}   // 第一次看到睡著的怪物（這台裝置只提示一次）   // 震動：吞光者、燼王第一次進入視野
  for(const m of G.mons)if(m.hp>0&&!MON[m.k].big&&vis[idx(m.x,m.y)]&&(!MON[m.k].shade||cheb(m.x,m.y,P.x,P.y)<=2||inCandle(m)))discover('m:'+m.k);
  for(const it of G.items)if(vis[idx(it.x,it.y)]&&['oil','potion','scroll','weapon','armor','gold','page','gem','lamp'].includes(it.cat))discover('i:'+it.cat);
@@ -1066,6 +1068,7 @@ function act(m){
  if(m.k==='bomb'&&m.st.burn>0){msg(L["t0272"],'ember');explode(m.x,m.y,8+G.depth,L["t0251"]);m.hp=0;return}
  if(m.st.burn>0){m.st.burn--;hurtMon(m,2,!!m.st.burnP);if(!m.st.burn)m.st.burnP=0;if(m.hp<=0)return}
  if(m.st.stun>0){m.st.stun--;return}
+ if(m.asleep&&m.deep){if(G.tutReady&&d<=2&&!P.hood&&P.oil>0){   /* 看過提示之後才會被燈照醒：轉角突然撞見時不會來不及讀 */m.asleep=false;m.aware=true;m.deep=false;msg(L.ui_tut_woke,'oil')}return}
  if(m.asleep){const lit=vis[idx(m.x,m.y)];if((d<=2&&chance(.4))||(lit&&chance(.15))){m.asleep=false;m.aware=true;if(lit)msg(tr("t0273",M.n),'dim')}return}
  if(M.ai==='moth'){if(P.hood||P.oil<=0){m.aware=false;if(chance(.5))wander(m);return}if(d<=lightR()+6)m.aware=true}
  if(!m.aware){if(d<=(P.hood?(rel('shell')?1:2):G.omen==='fog'?6:9)&&los(m.x,m.y,P.x,P.y)){m.aware=true;if(m.k==='wolf')howl(m)}else{if(chance(.3))wander(m);return}}
@@ -1480,6 +1483,13 @@ function victory(){G.won=true;G.over=true;sfx('level');buzz('win');const g0=galC
  if(e.firstWin)VDUR.dawn=9000;else delete VDUR.dawn;vignette('dawn',L.ui_ev_dawn,home)}
 
 /* ================= 新遊戲／存檔 ================= */
+// 第一局的教學：往樓梯的路上放一隻睡得很沉的灰狼。遮燈靠近牠不會醒，偷襲一刀重創；開著燈走到兩格內牠就醒（照樣打得贏，只是比較痛）
+function tutSetup(){const seen0=G.seen.slice();G.seen.fill(1);const path=bfsPath((x,y)=>tile(x,y)===T.STAIRS,false);for(let i=0;i<seen0.length;i++)G.seen[i]=seen0[i];   // 找路時暫時當作整層都看過
+ if(!path||path.length<7)return false;
+ const[x,y]=path[Math.min(path.length-3,8)];if(occupied(x,y)||featAt(x,y)||trapAt(x,y))return false;
+ G.mons=G.mons.filter(m=>cheb(m.x,m.y,x,y)>5&&cheb(m.x,m.y,P.x,P.y)>6);
+ const m=makeMon('wolf',x,y,1);m.hp=m.mhp=12;m.atk=5;m.spd=100;   /* 灰狼：沒有特殊機制，偷襲一刀幾乎解決 */
+ m.asleep=true;m.deep=true;m.tut=1;G.mons.push(m);return true}
 function newGame(daily,clsId,diff){document.body.classList.remove('ontitle');
  const cls=CLASSES.find(c=>c.id===clsId)||CLASSES[0];
  diff=daily?'normal':(DIFF[diff]?diff:'normal');
@@ -1492,7 +1502,7 @@ function newGame(daily,clsId,diff){document.body.classList.remove('ontitle');
  const om=chance(OMEN_CHANCE)?pick(OMENS.slice(1)):OMENS[0];G.omen=om.id;
  G.meta=daily?{}:{...(r.up||{})};G.grave=daily?null:(r.grave||null);if(!daily)delete r.grave;store(REC_KEY,r);
  G.lampPlan=daily?{}:lampPlan();
- P=G.P;ensureP();genFloor();cls.setup();
+ P=G.P;ensureP();genFloor();cls.setup();if(!daily&&!r.tut&&tutSetup()){r.tut=1;store(REC_KEY,r)}
  const U=k=>G.meta[k]||0;
  P.mhp+=4*U('vit');P.hp=P.mhp;for(let i=0;i<U('kit');i++)addInv({cat:'potion',k:'heal',n:1});for(let i=0;i<U('flask');i++)addInv({cat:'oil',n:1});if(asc()>=5)P.inv=P.inv.filter(i=>i.cat!=='oil');G.gold+=40*U('purse');
  if(U('lore')){const unk=shuffle([...POT.map(k=>k),...SCR.map(k=>k)].filter(k=>!G.known[k]));unk.slice(0,2*U('lore')).forEach(k=>G.known[k]=true)}
