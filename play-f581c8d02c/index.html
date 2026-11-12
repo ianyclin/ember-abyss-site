@@ -130,7 +130,8 @@ html[lang=en] .title h1{font-size:clamp(40px,10.5vw,76px);letter-spacing:.01em}
   .quick{grid-area:q;display:flex;justify-content:space-between}   /* 快捷1 靠左、快捷2 靠右，搖桿正上方留空 */
   #quick .qs{width:36%;max-width:150px;min-height:44px;padding:4px 6px;font-size:13px;gap:4px;text-overflow:ellipsis}#quick .qs b{font-size:16px}
   .acts{display:contents}
-  #bExplore{grid-area:l1;justify-self:start}#bInv{grid-area:l2;justify-self:start}#bAct{grid-area:r1;justify-self:end}#bSkill{grid-area:r2;justify-self:end}
+  #bAct{grid-area:l1;justify-self:start}#bSkill{grid-area:l2;justify-self:start}#bExplore{grid-area:r1;justify-self:end}#bInv{grid-area:r2;justify-self:end}
+  body.lefty #bExplore{grid-area:l1;justify-self:start}body.lefty #bInv{grid-area:l2;justify-self:start}body.lefty #bAct{grid-area:r1;justify-self:end}body.lefty #bSkill{grid-area:r2;justify-self:end}   /* 預設：搜索、特技在左；左撇子：搜索、特技在右 */
   .acts .btn{width:min(74px,100%);height:min(68px,100%);align-self:center;min-height:0;min-width:0;padding:6px 3px;font-size:16px;letter-spacing:.06em;white-space:normal;text-align:center;line-height:1.25;overflow-wrap:anywhere;overflow:hidden}
   html[lang=en] .acts .btn{font-size:12px;letter-spacing:0;overflow-wrap:normal;hyphens:auto;-webkit-hyphens:auto}
   @media (max-width:380px){html[lang=en] .acts .btn{font-size:11px}}
@@ -170,6 +171,9 @@ html[lang=ja] .stickz .ring b,html[lang=en] .stickz .ring b{font-size:10px}
 /* Modal */
 .modal{position:fixed;inset:0;background:rgba(6,5,4,.78);display:flex;align-items:center;justify-content:center;z-index:20;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-bottom,0px));backdrop-filter:blur(2px)}
 .sheet .stickyb{position:sticky;bottom:-22px;margin:14px -20px -22px!important;padding:12px 20px 16px;background:linear-gradient(to bottom,rgba(0,0,0,0),var(--stone) 30%);z-index:2}
+/* 標題畫面背景：出發前夜的井口廣場（art/events/title.jpg），選單面板半透明 */
+#tbg{display:none;position:fixed;inset:0;z-index:19;background:#0c0a09 center 62%/cover no-repeat}body.ontitle #tbg{display:block}
+body.ontitle .modal{background:rgba(6,5,4,.28)}body.ontitle .sheet{background:rgba(23,19,15,.84);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
 .sheet{width:min(560px,100%);max-height:100%;overflow:auto;background:var(--stone);border:1px solid var(--ash);border-radius:6px;padding:22px 20px;box-sizing:border-box;box-shadow:0 20px 60px rgba(0,0,0,.6)}
 .sheet h2{font-family:var(--f-display);font-weight:700;font-size:38px;margin:0 0 4px;color:var(--ember);line-height:1.1;text-wrap:balance}
 .sheet h3{font-size:13px;letter-spacing:.3em;color:var(--dim);margin:18px 0 8px;font-weight:700}
@@ -187,7 +191,7 @@ html[lang=ja] .stickz .ring b,html[lang=en] .stickz .ring b{font-size:10px}
 .it .t{min-width:0}
 .it .t b{display:block;font-size:15px}
 .it .t span{display:block;font-size:12px;color:var(--dim);line-height:1.5}
-.it .a{display:flex;gap:6px}
+.it .a{display:flex;gap:6px}.legend .mview{margin-left:6px;padding:1px 8px;min-height:0;font-size:11px;vertical-align:baseline}
 .equip{display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px}
 .equip div{border:1px solid var(--ash);border-radius:4px;padding:8px 10px;background:#1b1612}
 .equip small{display:block;color:var(--dim);letter-spacing:.2em;font-size:11px}
@@ -376,7 +380,7 @@ body.crit #danger{opacity:1;animation:dangerPulse 1.1s ease-in-out infinite}
     </div>
   </footer>
 </div>
-<div class="modal" id="modal" hidden><div class="sheet" id="sheet" role="dialog" aria-modal="true"></div></div>
+<div id="tbg" aria-hidden="true"></div><div class="modal" id="modal" hidden><div class="sheet" id="sheet" role="dialog" aria-modal="true"></div></div>
 
 <script src="native-store.js"></script>
 <script src="lang/zh-Hant.js"></script>
@@ -699,6 +703,7 @@ function samp(k,vol=.5,delay=0,rate=1){const a=SFXB[k];if(!a||!a.length)return f
 const KILL_SND={rat:'ksmall',bat:'ksmall',moth:'ksmall',spider:'ksmall',bomb:'ksmall',slime:'kslime',shade:'kshade',wraith:'kshade',wolf:'kwolf',skel:'kbone',archer:'kbone',golem:'kbig',guard:'kbig',mimic:'kbig',devour:'kbig',king:'kbig'};
 /* 震動回饋：App 版用 Capacitor Haptics；Android 瀏覽器用 navigator.vibrate；iPhone 的瀏覽器不支援震動（只有 App 版有） */
 const VIB_KEY='ember-abyss-vib';let vibOn=loadKey(VIB_KEY)!==false;
+const LEFTY_KEY='ember-abyss-lefty';let lefty=loadKey(LEFTY_KEY)===true;document.body.classList.toggle('lefty',lefty);
 const HAPT=()=>window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.Haptics;
 const canVib=()=>!!HAPT()||(typeof navigator!=='undefined'&&typeof navigator.vibrate==='function'&&matchMedia('(pointer:coarse)').matches);
 function buzz(k){if(!vibOn)return;try{const H=HAPT();
@@ -1210,7 +1215,7 @@ function tryMove(dx,dy){
  const nx=P.x+dx,ny=P.y+dy,m=monAt(nx,ny);
  if(m){playerAttack(m);endTurn();return true}
  {const t=shootTarget(dx,dy);if(t){if(P.rl>0){msg(L.ui_miko_reload,'dim');return false}shootAt(t);return true}}
- const f=featAt(nx,ny);if(f){useFeat(f);return true}
+ const f=featAt(nx,ny);if(f){if(BTN_FEAT(f.kind)){if(!G._featHint){G._featHint=1;msg(L.ui_feat_hint,'dim')}return false}useFeat(f);return true}   // 行商、燭台：撞上去不會觸發，靠近後按行動鍵（和祭壇、泉水一樣）
  if(!passable(nx,ny)){const wk=nx+','+ny+'@'+P.x+','+P.y;if(G._wallBuzz!==wk){G._wallBuzz=wk;buzz('wall')}return false}
  P.x=nx;P.y=ny;if(tile(nx,ny)===T.GRASS){G.map[idx(nx,ny)]=T.FLOOR;(G.trod=G.trod||{})[idx(nx,ny)]=1;fov()}   // 走過的高草被踩扁：不再擋視線，地上留著倒伏的草
  stepOn();if(!G.over)endTurn();return true}
@@ -1433,14 +1438,14 @@ function clsWinsOf(r){if(!r.clsWins){// 舊紀錄沒有記哪個職業通關：�
 function unlockedCls(r){if(TESTMODE===1)return[...CLASS_ORDER];const w=clsWinsOf(r);return CLASS_ORDER.filter((id,i)=>i===0||w.includes(id)||w.includes(CLASS_ORDER[i-1]))}
 const clsById=id=>CLASSES.find(c=>c.id===id);
 function scoreOf(){return G.depth*100+G.gold+G.kills*10+P.lvl*20+(G.won?2000:0)}
-function finishRun(){const r=loadKey(REC_KEY)||{best:0,hi:0,wins:0,runs:0};clsWinsOf(r);r.best=Math.max(r.best,G.depth);const s=scoreOf();const isHi=s>r.hi;r.hi=Math.max(r.hi,s);if(G.won){r.wins++;if(G.diff==='hard')r.winsHard=(r.winsHard||0)+1}
+function finishRun(){let fw=false;const r=loadKey(REC_KEY)||{best:0,hi:0,wins:0,runs:0};clsWinsOf(r);r.best=Math.max(r.best,G.depth);const s=scoreOf();const isHi=s>r.hi;r.hi=Math.max(r.hi,s);if(G.won){r.wins++;fw=r.wins===1;if(G.diff==='hard')r.winsHard=(r.winsHard||0)+1}
  let newAsc=0;if(G.won&&G.diff==='hard'){const a=asc();r.ascMax=r.ascMax||0;if(a>=r.ascMax&&r.ascMax<ASC_MAX){r.ascMax=a+1;newAsc=r.ascMax}}
  let newCls=null;if(G.won){const before=unlockedCls(r);if(!r.clsWins.includes(G.cls))r.clsWins.push(G.cls);newCls=unlockedCls(r).find(id=>!before.includes(id))||null}
  let newSeason=0;if(G.won){const wn=winsOfCls(r);wn[G.cls]=(wn[G.cls]||0)+1;if(SEASON_AT.includes(wn[G.cls]))newSeason=SEASON_AT.indexOf(wn[G.cls])+1}   // 天亮之後：同一職業通關第 2、4、6、8 次解鎖春夏秋冬
  let bonus=0,firstHard=false;if(G.won&&G.diff==='hard'){r.hardCls=r.hardCls||[];if(!r.hardCls.includes(G.cls)){r.hardCls.push(G.cls);firstHard=true}}
  const earn=Math.round((G.depth*8+G.kills+(G.pageEmb||0)+(G.midDown?20:0)+(G.won?120:0))*dif().emb)+bonus;r.embers=(r.embers||0)+earn;
  if(!G.won&&!G.daily)r.grave={depth:G.depth,cls:G.cls,lvl:P.lvl,gold:Math.floor(G.gold*.5)};
- store(REC_KEY,r);store(SAVE_KEY,null);return{s,isHi,earn,total:r.embers,bonus,firstHard,hardCount:(r.hardCls||[]).length,newCls,newAsc,newSeason}}
+ store(REC_KEY,r);store(SAVE_KEY,null);return{s,isHi,earn,total:r.embers,bonus,firstHard,hardCount:(r.hardCls||[]).length,newCls,newAsc,newSeason,firstWin:fw}}
 function emberLine(e){return tr("t0422",e.earn,e.bonus?tr("t0423",clsOf().n,e.bonus):'',e.total)}
 function statsHTML(){return tr("t0424",G.depth,P.lvl,G.kills,G.turn,G.gold,scoreOf())}
 function die(cause){G.over=true;G.cause=cause;sfx('die');buzz('die');auto=null;
@@ -1467,10 +1472,11 @@ function lampEnding(){const carried=P.lamps;if(!carried.length&&!G.dzUp)return '
  if(G.dzUp)h+=`<p>${L.ui_dz_up}</p>`;else if(carried.includes('dongzhi'))h+=`<p>${L.ui_dz_wait}</p>`;
  return `<div class="story">${h}</div>`}
 function victory(){G.won=true;G.over=true;sfx('level');buzz('win');const g0=galCount(loadKey(REC_KEY)||{}),LE=lampEnding(),e=finishRun(),{s,isHi}=e,gNew=galCount(loadKey(REC_KEY)||{})-g0;
- const show=()=>openModal(tr("t0440",G.diff==='hard'?L["t0441"]+(asc()?' '+tr("ui_asc_lv",asc()):''):'',clsOf().n,(L['cs_'+G.cls+'_end']?`<div class="story"><p>${L['cs_'+G.cls+'_end']}</p></div>`:'')+(G.diff==='hard'?tr("t0442",e.firstHard?tr("t0443",clsOf().n,e.hardCount):''):'')+LE,statsHTML(),emberLine(e)+(e.newCls?(!isFull()&&clsPaid(e.newCls)?`<p class="unlock">${tr("ui_full_next",clsById(e.newCls).n)}</p><div class="row"><button class="btn small" id="vFull" type="button">${L.ui_full_see}</button></div>`:`<p class="unlock">${tr("ui_cls_new",clsById(e.newCls).n)}</p>`):'')+(e.newAsc?`<p class="unlock">${tr("ui_asc_new",e.newAsc)}</p>`:'')+(gNew>0?`<p class="unlock">${tr("ui_gal_new",gNew)}</p>`:'')+(e.newSeason?`<p class="unlock">${tr('ui_season_new',clsOf().n,L['ui_season_'+e.newSeason])}</p>`:''),isHi?L["t0437"]:'',G.daily?L["t0438"]+G.daily:''),false,()=>{$('#mNew').onclick=()=>classModal(false);$('#mTitle').onclick=showTitle;{const vf=$('#vFull');if(vf)vf.onclick=()=>fullModal(showTitle)}});if(LE)vignette('lamphome',L.ui_ev_lamphome,show);else show()}
+ const show=()=>openModal(tr("t0440",G.diff==='hard'?L["t0441"]+(asc()?' '+tr("ui_asc_lv",asc()):''):'',clsOf().n,(L['cs_'+G.cls+'_end']?`<div class="story"><p>${L['cs_'+G.cls+'_end']}</p></div>`:'')+(G.diff==='hard'?tr("t0442",e.firstHard?tr("t0443",clsOf().n,e.hardCount):''):'')+LE,statsHTML(),emberLine(e)+(e.newCls?(!isFull()&&clsPaid(e.newCls)?`<p class="unlock">${tr("ui_full_next",clsById(e.newCls).n)}</p><div class="row"><button class="btn small" id="vFull" type="button">${L.ui_full_see}</button></div>`:`<p class="unlock">${tr("ui_cls_new",clsById(e.newCls).n)}</p>`):'')+(e.newAsc?`<p class="unlock">${tr("ui_asc_new",e.newAsc)}</p>`:'')+(gNew>0?`<p class="unlock">${tr("ui_gal_new",gNew)}</p>`:'')+(e.newSeason?`<p class="unlock">${tr('ui_season_new',clsOf().n,L['ui_season_'+e.newSeason])}</p>`:''),isHi?L["t0437"]:'',G.daily?L["t0438"]+G.daily:''),false,()=>{$('#mNew').onclick=()=>classModal(false);$('#mTitle').onclick=showTitle;{const vf=$('#vFull');if(vf)vf.onclick=()=>fullModal(showTitle)}});const home=()=>LE?vignette('lamphome',L.ui_ev_lamphome,show):show();   // 天亮 → 帶燈回家 → 結算；第一次通關慢速
+ if(e.firstWin)VDUR.dawn=9000;else delete VDUR.dawn;vignette('dawn',L.ui_ev_dawn,home)}
 
 /* ================= 新遊戲／存檔 ================= */
-function newGame(daily,clsId,diff){
+function newGame(daily,clsId,diff){document.body.classList.remove('ontitle');
  const cls=CLASSES.find(c=>c.id===clsId)||CLASSES[0];
  diff=daily?'normal':(DIFF[diff]?diff:'normal');
  const day=todayStr();RS=daily?hashStr('ember'+day):(Math.random()*4294967296)>>>0;
@@ -1492,7 +1498,7 @@ function newGame(daily,clsId,diff){
  closeModal(true);banner(L["t0448"],FLOORS[1]);musMode();save();updateHUD();
  if(r.runs===1)openModal(tr("t0449",INTRO),true,()=>{$('#inOk').onclick=()=>closeModal()})}
 function save(){if(!G||G.over)return;G.rs=RS;store(SAVE_KEY,G)}
-function resume(g){G=g;P=G.P;ensureP();relocalize();
+function resume(g){document.body.classList.remove('ontitle');G=g;P=G.P;ensureP();relocalize();
  // 讀檔：清掉畫面用的暫時狀態（時間點屬於上一次開啟的計時器，留著會讓角色一直閃白、抖動）
  for(const e of[P,...(G.mons||[])]){delete e.hitT;delete e.atkT;delete e.tt0;delete e.fx;delete e.fy;e.vx=e.tx=e.x;e.vy=e.ty=e.y;e.bx=e.by=0}if(G.scrMap&&G.scrMap.douse===undefined)G.scrMap.douse=8;RS=G.rs||RS;FX=[];closeModal(true);
  if(G.dying){const c=G.dying;G.dying=null;fov();updateHUD();renderLog();G.over=true;dieFinal(c);return}musMode();fov();computeDist();renderLog();updateHUD();banner(tr("t0337",NUM[G.depth]),FLOORS[G.depth])}
@@ -1514,7 +1520,7 @@ function updateHUD(){if(!G)return;
  $('#status').innerHTML=s;
  const t=tile(P.x,P.y),b=$('#bAct');
  const lab=t===T.STAIRS?L["t0464"]:t===T.ALTAR?L["t0465"]:t===T.FOUNT?L["t0466"]:L["t0467"];
- const atk=!!atkTarget();b.innerHTML=`${atk?L.ui_attack:lab} <kbd>G</kbd>`;b.classList.toggle('hot',!atk&&lab!==L["t0467"]);b.classList.toggle('atk',atk);
+ const atk=!!atkTarget(),ft=!atk&&featTarget(),fl=ft?(ft.kind==='merchant'?L.ui_act_trade:L.ui_act_light):'';b.innerHTML=`${atk?L.ui_attack:fl||lab} <kbd>G</kbd>`;b.classList.toggle('hot',!atk&&(!!ft||lab!==L["t0467"]));b.classList.toggle('atk',atk);
  const S=SKILLS[G.cls||'lamp'],sb=$('#bSkill'),cd=G.cd||0;
  sb.innerHTML=`${S.n}${cd?' '+cd:''} <kbd>F</kbd>`;sb.classList.toggle('ready',!cd);sb.classList.toggle('cool',!!cd);
  renderQuick();renderLog()}
@@ -1641,7 +1647,7 @@ function classModal(daily){
   $('#sheet').querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{if(canPlay(b.dataset.c))newGame(daily,b.dataset.c,diff)});
   // 免費版：完整版的職業卡片可以點，點了打開購買說明；照順序還沒輪到的維持鎖定樣式（買了也要先通關前一個），不讓人誤以為買了就能玩
   if(!isFull())$('#sheet').querySelectorAll('[data-c]').forEach(b=>{if(clsPaid(b.dataset.c)){b.disabled=false;b.classList.add('paid');b.onclick=()=>fullModal(()=>classModal(daily))}})})}
-function showTitle(){G=null;P=null;FX=[];document.body.classList.remove('crit');document.querySelectorAll('.bar.low').forEach(b=>b.classList.remove('low'));renderLog();musMode();
+function showTitle(){G=null;P=null;FX=[];document.body.classList.add('ontitle');document.body.classList.remove('crit');document.querySelectorAll('.bar.low').forEach(b=>b.classList.remove('low'));renderLog();musMode();
  const r=loadKey(REC_KEY)||{best:0,hi:0,wins:0,runs:0},sv=loadKey(SAVE_KEY);
  openModal(tr("t0485",sv&&(!sv.over||sv.dying)?tr("t0486",(CLASSES.find(c=>c.id===sv.cls)||CLASSES[0]).n,(DIFF[sv.diff]||DIFF.normal).n,NUM[sv.depth],sv.P.lvl,sv.P.hp,sv.P.mhp):'',sv&&(!sv.over||sv.dying)?L["t0487"]:'',todayStr(),r.embers||0,(r.pages||[]).length,r.best,r.hi,r.wins,r.winsHard||0,(r.hardCls||[]).length,r.runs,MUS.on,MUS.on?L["g_開"]:L["g_關"],soundOn,soundOn?L["g_開"]:L["g_關"]),false,()=>{
   if($('#tCont'))$('#tCont').onclick=()=>resume(sv);
@@ -1688,8 +1694,8 @@ function helpModal(fromTitle){
  const lv4=[[null,L["g_我"],'#fff1d6',L["g_你"],'player_'+((G&&G.cls)||'lamp')],['stairs',L["g_下"],'#ffab5c',L["t0488"],'stairs'],['i:oil',L["g_油"],'#e9b949',L["t0380"],'oil'],['i:potion',L["g_藥"],'#e45a4f',L["t0489"],'potion'],['i:scroll',L["g_符"],'#ecd58e',L["t0490"],'scroll'],['i:weapon',L["g_刃"],'#d6dde6',L["t0491"],'weapon'],['i:armor',L["g_甲"],'#bfc8a6',L["t0492"],'armor'],['i:gold',L["g_map_gold"]||'金','#f4d25a',L["t0493"],'gold'],['f:chest',L["g_箱"],'#d8a868',L["t0494"],'chest'],['f:merchant',L["g_商"],'#7fd1c0',L["t0495"],'merchant'],['t:altar',L["g_祭"],'#e0584a',L["t0496"],'altar'],['i:page',L["g_頁"],'#efe3cc',L["t0497"],'page'],['f:grave',L["g_墓"],'#cfc6b8',L["t0498"],'grave'],['i:gem',L["g_晶"],'#ff6a4a',L["t0499"],'gem'],['f:bones',L["g_骸"],'#8f887a',L["t0500"],'bones'],['t:sealed',L["g_封"],'#b294e6',L["t0501"],'sealed'],['f:brazier',L["g_燭"],'#ffab5c',L["t0502"],'brazier_lit'],['t:fountain',L["g_泉"],'#6cc2a6',L["t0503"],'fountain'],['i:lamp',L.g_lamp||'燈','#c9a46a',L.ui_legend_lamp,'lamp']];
  const lvSeen=lv4.filter(l=>!l[0]||D.has(l[0])),mons=Object.entries(MON).filter(([k,m])=>!m.big),monSeen=mons.filter(([k])=>D.has('m:'+k));
  const LG=`<p class="tiny">${tr("ui_help_seen",lvSeen.length,lv4.length)}</p><div class="legend">${lvSeen.map(l=>`<div>${img(l[4])}<b style="color:${l[2]}">${l[1]}</b>${l[3]}</div>`).join('')}</div>`;
- const ML=`<p class="tiny">${tr("ui_help_seen",monSeen.length,mons.length)}</p>`+(monSeen.length?`<div class="legend mons">${monSeen.map(([k,m])=>`<div>${img(k)}<span>${tr("t0504",m.c,m.g,m.n,m.desc)}</span></div>`).join('')}</div>`:'');
- openModal(tr("t0505",CLASS_ORDER.map(clsById).map(c=>`<div>${img('player_'+c.id)}<span>${tr("t0506",c.c,c.g,c.n,c.desc,SKILLS[c.id].n,SKILLS[c.id].d)}</span></div>`).join(''),LG,ML,L.ui_back),!fromTitle,()=>{$('#hBack').onclick=()=>fromTitle?showTitle():closeModal();$('#hBack').parentNode.classList.add('stickyb');$('#hBack').parentNode.insertAdjacentHTML('beforebegin',`<h3>${L.ui_help_bag_title}</h3><p class="muted">${L.ui_help_bag}</p><h3>${L.ui_gp_title}</h3><p class="muted">${L.ui_gp_help}</p>`)})}
+ const ML=`<p class="tiny">${tr("ui_help_seen",monSeen.length,mons.length)}</p>`+(monSeen.length?`<div class="legend mons">${monSeen.map(([k,m])=>`<div>${img(k)}<span>${tr("t0504",m.c,m.g,m.n,m.desc)}${EVENTS['m_'+k]?` <button class="btn small mview" type="button" data-mv="${k}">${L.ui_best_view}</button>`:''}</span></div>`).join('')}</div>`:'');
+ openModal(tr("t0505",CLASS_ORDER.map(clsById).map(c=>`<div>${img('player_'+c.id)}<span>${tr("t0506",c.c,c.g,c.n,c.desc,SKILLS[c.id].n,SKILLS[c.id].d)}</span></div>`).join(''),LG,ML,L.ui_back),!fromTitle,()=>{$('#hBack').onclick=()=>fromTitle?showTitle():closeModal();$('#sheet').querySelectorAll('[data-mv]').forEach(b=>b.onclick=()=>{const v=vigOn;vigOn=true;vignette('m_'+b.dataset.mv,MON[b.dataset.mv].n,null);vigOn=v});   /* 怪物圖鑑：點了全畫面看插圖（不受「事件插圖」開關影響） */$('#hBack').parentNode.classList.add('stickyb');$('#hBack').parentNode.insertAdjacentHTML('beforebegin',`<h3>${L.ui_help_bag_title}</h3><p class="muted">${L.ui_help_bag}</p><h3>${L.ui_gp_title}</h3><p class="muted">${L.ui_gp_help}</p>`)})}
 function langModal(back){
  openModal(`<h2>${L.ui_lang_title||'Language'}</h2><div class="stack">${Object.keys(LANG_NAMES).filter(id=>window.EMBER_LANG&&EMBER_LANG[id]).map(id=>`<button class="choice" data-lang="${id}" type="button"><b>${LANG_NAMES[id]}${id===LANG_ID?' ✓':''}</b></button>`).join('')}</div><div class="row" style="margin-top:14px"><button class="btn" id="lgBack" type="button">${L.ui_back||'Back'}</button></div>`,false,()=>{
   $('#lgBack').onclick=back;
@@ -1743,12 +1749,13 @@ function bindTestTap(redraw){const v=$('#abVer');if(!v||IS_APP_BUILD)return;let 
 function settingsModal(back){
  const row=(id,label,val,on)=>`<button class="tog" id="${id}" type="button"${on===undefined?'':` aria-pressed="${on}"`}><span>${label}</span><i>${val}</i></button>`,oo=b=>b?L["g_開"]:L["g_關"];
  openModal(`<h2>${L.ui_settings}</h2><h3>${L.ui_set_sound}</h3><div class="${canVib()?'trio':'pair'}">${row('sMus',L["t0511"],oo(MUS.on),MUS.on)}${row('sSnd',L["t0512"],oo(soundOn),soundOn)}${canVib()?row('sVib',L.ui_vib,oo(vibOn),vibOn):''}</div>
-  <h3>${L.ui_set_view}</h3><div class="setl">${SPR?row('sStyle',L.ui_style,STYLE==='pixel'?L.ui_style_pixel:L.ui_style_glyph):''}${row('sZoom',L.ui_zoom,Math.round(ZOOM*100)+'%')}${matchMedia('(hover:hover) and (pointer:fine)').matches?'':row('sCtrl',L.ui_ctrl,CTRL==='stick'?L.ui_ctrl_stick:L.ui_ctrl_pad)}${Object.keys(EVENTS).length?row('sVig',L.ui_ev_toggle,oo(vigOn),vigOn):''}${row('sLang',L.ui_lang,LANG_NAMES[LANG_ID])}<button class="tog" id="sBackup" type="button"><span>${L.ui_bk}</span><i>›</i></button><button class="tog" id="sAbout" type="button"><span>${L.ui_about}</span><i>›</i></button></div>
+  <h3>${L.ui_set_view}</h3><div class="setl">${SPR?row('sStyle',L.ui_style,STYLE==='pixel'?L.ui_style_pixel:L.ui_style_glyph):''}${row('sZoom',L.ui_zoom,Math.round(ZOOM*100)+'%')}${matchMedia('(hover:hover) and (pointer:fine)').matches?'':row('sCtrl',L.ui_ctrl,CTRL==='stick'?L.ui_ctrl_stick:L.ui_ctrl_pad)+row('sLefty',L.ui_lefty,oo(lefty),lefty)}${Object.keys(EVENTS).length?row('sVig',L.ui_ev_toggle,oo(vigOn),vigOn):''}${row('sLang',L.ui_lang,LANG_NAMES[LANG_ID])}<button class="tog" id="sBackup" type="button"><span>${L.ui_bk}</span><i>›</i></button><button class="tog" id="sAbout" type="button"><span>${L.ui_about}</span><i>›</i></button></div>
   <div class="row" style="margin-top:18px"><button class="btn" id="sBack" type="button">${L.ui_back}</button></div>`,!!G,()=>{
   const again=()=>settingsModal(back);
   $('#sBack').onclick=back;$('#sAbout').onclick=()=>aboutModal(again);$('#sBackup').onclick=()=>backupModal(again);$('#sLang').onclick=()=>langModal(again);
   $('#sMus').onclick=()=>{toggleMusic();again()};{const v=$('#sVib');if(v)v.onclick=()=>{vibOn=!vibOn;store(VIB_KEY,vibOn);if(vibOn)buzz('hit');again()}}$('#sSnd').onclick=()=>{soundOn=!soundOn;store(SND_KEY,soundOn);if(soundOn)sfx('pick');again()};
   bindStyle('sStyle',again);bindZoom('sZoom',again);
+  {const c=$('#sLefty');if(c)c.onclick=()=>{lefty=!lefty;store(LEFTY_KEY,lefty);document.body.classList.toggle('lefty',lefty);again()}}
   {const c=$('#sCtrl');if(c)c.onclick=()=>{CTRL=CTRL==='stick'?'pad':'stick';try{localStorage.setItem(CTRL_KEY,CTRL)}catch(e){}applyCtrl();again()}}
   {const v=$('#sVig');if(v)v.onclick=()=>{vigOn=!vigOn;try{localStorage.setItem(VIG_KEY,vigOn?'on':'off')}catch(e){}again()}}})}
 /* 紀錄備份：匯出成一段文字（備份碼），換手機時貼回去。
@@ -1957,7 +1964,7 @@ const VCAM={
  altar:[50,50,1,50,50,1],descend:[30,65,1.35,70,72,1],descend_2:[42,60,1.08,56,44,1.3],descend_3:[34,60,1.35,78,30,1],descend_4:[32,62,1.35,76,45,1.2],
  descend_5:[24,57,1.35,64,45,1.2],descend_6:[32,58,1.35,76,32,1.2],descend_7:[29,64,1.35,72,40,1],descend_8:[46,66,1.5,50,50,1],descend_9:[25,75,1.35,72,58,1],
  descend_10:[36,75,1.35,55,30,1],devour:[62,28,1.35,43,62,0],dzhand:[34,62,1.45,56,50,0],dzreveal:[62,45,1.4,49,50,0],fountain:[58,58,1,58,58,1],
- grave:[69,71,1.5,57,45,1.15],king:[57,22,1.6,50,55,0],lampcity:[42,55,1.25,15,45,1],lampcity_lit:[0,50,1.25,100,50,1.25],lamphome:[30,42,1.35,62,45,0],
+ grave:[69,71,1.5,57,45,1.15],king:[57,22,1.6,50,55,0],lampcity:[42,55,1.25,15,45,1],lampcity_lit:[0,50,1.25,100,50,1.25],dawn:[57,38,1.3,57,45,0],lamphome:[30,42,1.35,62,45,0],
  merchant:[43,45,1,43,45,1],note:[52,50,0,52,50,0],oldlamp:[58,55,1,58,55,1],page:[45,50,1,45,50,1],warden:[47,19,1.6,47,50,0],
  // 畫廊：從視覺重點（多半是臉）拉遠到看見全貌
  berserk_1:[52,15,1.8,50,50,0],blade_1:[42,14,1.8,50,50,0],ferry_1:[42,18,1.8,50,50,0],lamp_1:[48,17,1.8,50,50,0],miko_1:[40,16,1.8,50,50,0],monk_1:[45,16,1.8,50,50,0],rune_1:[45,18,1.8,50,50,0],shadow_1:[45,17,1.8,50,50,0],
@@ -1967,13 +1974,13 @@ const VCAM={
  berserk_5:[22,20,1.25,50,50,0],blade_5:[41,24,1.25,50,50,0],ferry_5:[38,16,1.25,50,50,0],lamp_5:[39,20,1.25,50,50,0],miko_5:[36,24,1.25,50,50,0],monk_5:[29,24,1.25,50,50,0],rune_5:[40,22,1.25,50,50,0],shadow_5:[22,20,1.25,50,50,0],
  city_all:[20,45,1.2,50,50,0]};
 // 鏡頭：圖放在 .vstage 裡一起移動，局部動態（燈火、煙、水光、目光）畫在同一層的 canvas 上，跟著圖走
-function vcam(img,key){if(!img.naturalWidth)return;const c=VCAM[key]||(/_s\d$/.test(key)?[50,36,1.35,50,50,0]:[50,50,1.15,50,50,1]);
+function vcam(img,key){if(!img.naturalWidth)return;const c=VCAM[key]||(/_s\d$/.test(key)?[50,36,1.35,50,50,0]:/^m_/.test(key)?[50,42,1.3,50,50,0]:[50,50,1.15,50,50,1]);
  let st=img.parentNode;if(!st.classList.contains('vstage')){st=document.createElement('div');st.className='vstage';img.before(st);st.appendChild(img)}
  const host=st.parentNode,box=host.getBoundingClientRect(),W=box.width,H=box.height,iw=img.naturalWidth,ih=img.naturalHeight,k=Math.max(W/iw,H/ih);
  st.style.width=iw*k+'px';st.style.height=ih*k+'px';
  // 放大倍數 0 = 拉遠到看見全貌：整張圖放得下為止，空出來的地方露出同一張圖的模糊暗底
  const fit=Math.min(W/iw,H/ih)/k,pos=(v,d,S)=>d<=S?(S-d)/2:Math.min(0,Math.max(S-d,S/2-v/100*d));
- const far=W>H||GAL[key]?fit:1,fr=(x,y,z)=>{z=z||far;const dw=iw*k*z,dh=ih*k*z;return{transform:`translate(${pos(x,dw,W)}px,${pos(y,dh,H)}px) scale(${z})`}};
+ const far=W>H||GAL[key]||/^m_/.test(key)?fit:1,fr=(x,y,z)=>{z=z||far;const dw=iw*k*z,dh=ih*k*z;return{transform:`translate(${pos(x,dw,W)}px,${pos(y,dh,H)}px) scale(${z})`}};
  const ks=[];for(let i=0;i<c.length;i+=3)ks.push(fr(c[i],c[i+1],c[i+2]));const last=ks[ks.length-1];
  if(c[c.length-1]===0&&far<1)host.classList.add('fitbg');
  if(VFX[key]&&!reduceMotion)vfx(st,VFX[key],iw*k,ih*k);
@@ -1981,6 +1988,7 @@ function vcam(img,key){if(!img.naturalWidth)return;const c=VCAM[key]||(/_s\d$/.t
  st.animate(ks,{duration:VDUR[key]||(VSLOW.has(key)||GAL[key]?5400:3700)+(ks.length>2?1000:0),easing:'cubic-bezier(.3,0,.25,1)',fill:'forwards'})}
 // 很少遇到、或一輩子只遇到一次的圖（含畫廊第一次打開）：慢速
 const VDUR={lampcity_lit:10000};   // 燈城全亮：從最左慢慢帶到最右
+{const t=EVENTS.title,el=document.getElementById('tbg');if(t&&el)el.style.backgroundImage=`url(${t})`}
 const VSLOW=new Set(['grave','warden','devour','king','dzreveal','dzhand','lamphome']);
 // 局部動態：座標是圖上的百分比。flick 燈火搖曳［x,y,半徑］、sway 燈光擺動、smoke 煙［x,y,寬］、water 水光［x,y,橫半徑,縱半徑］、glint 目光一閃［x,y］、motes 光裡的微塵／螢光［x,y,橫半徑,縱半徑,顏色］、pulse 緩慢明暗［x,y,半徑,顏色,基礎亮度,起伏］、stream 沿曲線往終點漂的微光［起點,控制點,終點,顏色,數量,散佈寬,亮度,大小,秒數］、candle 燭光燈影：整個畫面的光隨燭火忽明忽暗、影子跟著晃［燈的x,y］、lumen 圖上本來就亮的淡黃色部分微微呼吸發亮［亮度門檻,只取上方 y%,暖色比例,強度］
 const VFX={
@@ -1993,6 +2001,7 @@ const VFX={
  note:[['candle',11,50],['motes',22,48,16,22,'255,190,120']],
  warden:[['pulse',46,19.2,1.2,'255,150,70',.22,.16],['pulse',48.6,19.2,1.2,'255,150,70',.22,.16],['pulse',77,25,9,'170,90,255'],['flick',7,75,10]],
  king:[['flick',57,19,9],['motes',52,50,30,32,'255,120,40'],['pulse',50,84,30,'255,90,20',.05,.05]],
+ dawn:[['pulse',57,28,14,'255,200,120',.06,.07],['motes',57,40,10,26,'255,210,150']],
  devour:[['lumen',75,80,1.2,2.6],['motes',46,58,16,18,'255,220,170'],['motes',56,38,14,14,'255,225,180']],
  dzreveal:[['flick',80,32,10],['flick',42,73,8]]};
 function vfx(st,list,SW,SH){const cv=document.createElement('canvas');cv.className='vfx';st.appendChild(cv);
@@ -2057,8 +2066,10 @@ function atkTarget(){if(!G||G.over)return null;let best=null;
  for(const m of G.mons)if(m.hp>0&&cheb(m.x,m.y,P.x,P.y)===1&&monVisible(m)&&(!best||m.hp<best.hp))best=m;
  if(best)return best;if(G.cls!=='miko'||P.rl>0)return null;let bd=99;
  for(const m of G.mons)if(canShootAt(m)){const d=cheb(m.x,m.y,P.x,P.y);if(d<bd){bd=d;best=m}}return best}
+const BTN_FEAT=k=>k==='merchant'||k==='brazier';
+function featTarget(){if(!G||G.over)return null;let best=null;for(const f of G.feats)if(BTN_FEAT(f.kind)&&cheb(f.x,f.y,P.x,P.y)===1&&!(f.kind==='brazier'&&f.lit)&&(!best||f.kind==='merchant'))best=f;return best}
 function doInteract(){if(!canAct())return;auto=null;const m=atkTarget();
- if(m){if(cheb(m.x,m.y,P.x,P.y)===1)tryMove(m.x-P.x,m.y-P.y);else shootAt(m)}else interact();updateHUD()}
+ if(m){if(cheb(m.x,m.y,P.x,P.y)===1)tryMove(m.x-P.x,m.y-P.y);else shootAt(m)}else{const f=featTarget();if(f)useFeat(f);else interact()}updateHUD()}
 function doExplore(){if(!canAct())return;
  if(anyVisibleMon()){msg(L["t0589"],'blood');return}
  auto={kind:'explore'};autoTick()}
