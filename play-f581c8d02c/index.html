@@ -540,7 +540,7 @@ const SLEEP_TIP_KEY='ember-abyss-tip-sleep';let sleepTipped=(()=>{try{return !!l
 function discScan(){if(!G||!P)return;
  for(const m of G.mons)if(m.hp>0&&MON[m.k].big&&!m.buzzed&&vis[idx(m.x,m.y)]){m.buzzed=true;buzz('heavy')}
  {const tm=!G.tutShown&&G.mons.find(m=>m.tut&&m.asleep&&m.hp>0&&vis[idx(m.x,m.y)]);if(tm){G.tutShown=1;tm.autoSeen=1;auto=null;sleepTipped=true;try{localStorage.setItem(SLEEP_TIP_KEY,'1')}catch(e){}
-  const show=()=>{if(!G||G.over||!tm.asleep||tm.hp<=0)return;if(modalOpen||VIG){setTimeout(show,400);return}openModal(tr('ui_tut_sleep',MON[tm.k].n)+`<div class="row" style="margin-top:14px"><button class="btn hot" id="pgOk" type="button">${L.ui_tut_ok}</button></div>`,false,()=>{$('#pgOk').onclick=()=>{G.tutReady=1;closeModal()}})};setTimeout(show,350)}}
+  const show=()=>{if(!G||G.over||!tm.asleep||tm.hp<=0)return;if(modalOpen||VIG){setTimeout(show,400);return}openModal(tr('ui_tut_sleep',MON[tm.k].n)+`<div class="row" style="margin-top:14px"><button class="btn hot" id="pgOk" type="button">${L.ui_tut_ok}</button></div>`,false,()=>{$('#pgOk').onclick=()=>{G.tutReady=1;closeModal(true);save()}})};setTimeout(show,350)}}
  if(!sleepTipped&&G.mons.some(m=>m.hp>0&&m.asleep&&monVisible(m))){sleepTipped=true;try{localStorage.setItem(SLEEP_TIP_KEY,'1')}catch(e){}msg(L.ui_tip_sleep,'dim')}   // 第一次看到睡著的怪物（這台裝置只提示一次）   // 震動：吞光者、燼王第一次進入視野
  for(const m of G.mons)if(m.hp>0&&!MON[m.k].big&&vis[idx(m.x,m.y)]&&(!MON[m.k].shade||cheb(m.x,m.y,P.x,P.y)<=2||inCandle(m)))discover('m:'+m.k);
  for(const it of G.items)if(vis[idx(it.x,it.y)]&&['oil','potion','scroll','weapon','armor','gold','page','gem','lamp'].includes(it.cat))discover('i:'+it.cat);
