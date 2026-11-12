@@ -1215,7 +1215,7 @@ function tryMove(dx,dy){
  const nx=P.x+dx,ny=P.y+dy,m=monAt(nx,ny);
  if(m){playerAttack(m);endTurn();return true}
  {const t=shootTarget(dx,dy);if(t){if(P.rl>0){msg(L.ui_miko_reload,'dim');return false}shootAt(t);return true}}
- const f=featAt(nx,ny);if(f){if(BTN_FEAT(f.kind)){if(!G._featHint){G._featHint=1;msg(L.ui_feat_hint,'dim')}return false}useFeat(f);return true}   // 行商、燭台：撞上去不會觸發，靠近後按行動鍵（和祭壇、泉水一樣）
+ const f=featAt(nx,ny);if(f){if(BTN_FEAT(f.kind)){if(!G._featHint){G._featHint=1;msg(L.ui_feat_hint,'dim')}return false}useFeat(f);return true}   // 行商、燭台、寶箱、前人的墓：撞上去不會觸發，靠近後按行動鍵（和祭壇、泉水一樣）
  if(!passable(nx,ny)){const wk=nx+','+ny+'@'+P.x+','+P.y;if(G._wallBuzz!==wk){G._wallBuzz=wk;buzz('wall')}return false}
  P.x=nx;P.y=ny;if(tile(nx,ny)===T.GRASS){G.map[idx(nx,ny)]=T.FLOOR;(G.trod=G.trod||{})[idx(nx,ny)]=1;fov()}   // 走過的高草被踩扁：不再擋視線，地上留著倒伏的草
  stepOn();if(!G.over)endTurn();return true}
@@ -1520,7 +1520,7 @@ function updateHUD(){if(!G)return;
  $('#status').innerHTML=s;
  const t=tile(P.x,P.y),b=$('#bAct');
  const lab=t===T.STAIRS?L["t0464"]:t===T.ALTAR?L["t0465"]:t===T.FOUNT?L["t0466"]:L["t0467"];
- const atk=!!atkTarget(),ft=!atk&&featTarget(),fl=ft?(ft.kind==='merchant'?L.ui_act_trade:L.ui_act_light):'';b.innerHTML=`${atk?L.ui_attack:fl||lab} <kbd>G</kbd>`;b.classList.toggle('hot',!atk&&(!!ft||lab!==L["t0467"]));b.classList.toggle('atk',atk);
+ const atk=!!atkTarget(),ft=!atk&&featTarget(),fl=ft?L[FEAT_LABEL[ft.kind]]:'';b.innerHTML=`${atk?L.ui_attack:fl||lab} <kbd>G</kbd>`;b.classList.toggle('hot',!atk&&(!!ft||lab!==L["t0467"]));b.classList.toggle('atk',atk);
  const S=SKILLS[G.cls||'lamp'],sb=$('#bSkill'),cd=G.cd||0;
  sb.innerHTML=`${S.n}${cd?' '+cd:''} <kbd>F</kbd>`;sb.classList.toggle('ready',!cd);sb.classList.toggle('cool',!!cd);
  renderQuick();renderLog()}
@@ -2066,8 +2066,9 @@ function atkTarget(){if(!G||G.over)return null;let best=null;
  for(const m of G.mons)if(m.hp>0&&cheb(m.x,m.y,P.x,P.y)===1&&monVisible(m)&&(!best||m.hp<best.hp))best=m;
  if(best)return best;if(G.cls!=='miko'||P.rl>0)return null;let bd=99;
  for(const m of G.mons)if(canShootAt(m)){const d=cheb(m.x,m.y,P.x,P.y);if(d<bd){bd=d;best=m}}return best}
-const BTN_FEAT=k=>k==='merchant'||k==='brazier';
-function featTarget(){if(!G||G.over)return null;let best=null;for(const f of G.feats)if(BTN_FEAT(f.kind)&&cheb(f.x,f.y,P.x,P.y)===1&&!(f.kind==='brazier'&&f.lit)&&(!best||f.kind==='merchant'))best=f;return best}
+const BTN_FEAT=k=>k==='merchant'||k==='brazier'||k==='chest'||k==='grave';
+const FEAT_RANK={merchant:0,grave:1,chest:2,brazier:3},FEAT_LABEL={merchant:'ui_act_trade',brazier:'ui_act_light',chest:'ui_act_open',grave:'ui_act_grave'};
+function featTarget(){if(!G||G.over)return null;let best=null;for(const f of G.feats)if(BTN_FEAT(f.kind)&&cheb(f.x,f.y,P.x,P.y)===1&&!(f.kind==='brazier'&&f.lit)&&(!best||FEAT_RANK[f.kind]<FEAT_RANK[best.kind]))best=f;return best}
 function doInteract(){if(!canAct())return;auto=null;const m=atkTarget();
  if(m){if(cheb(m.x,m.y,P.x,P.y)===1)tryMove(m.x-P.x,m.y-P.y);else shootAt(m)}else{const f=featTarget();if(f)useFeat(f);else interact()}updateHUD()}
 function doExplore(){if(!canAct())return;
