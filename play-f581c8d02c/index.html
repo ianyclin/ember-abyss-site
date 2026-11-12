@@ -66,6 +66,7 @@ button{font:inherit;color:inherit}
 /* Stage */
 .stage{position:relative;flex:1;min-height:0;border:1px solid var(--ash);border-radius:4px;overflow:hidden;background:var(--void)}
 #cv{display:block;width:100%;height:100%;touch-action:none}
+.log.quiet p:not(:last-child){display:none}.log.quiet p:last-child{opacity:.5!important}
 .log{position:absolute;left:10px;right:10px;bottom:8px;display:flex;flex-direction:column;gap:2px;font-size:13px;line-height:1.45;pointer-events:auto;cursor:pointer}
 .log p{margin:0;text-shadow:0 1px 3px #000,0 0 8px #000;max-width:46em}
 .banner{position:absolute;left:0;right:0;top:22%;text-align:center;pointer-events:none;opacity:0;transition:opacity .6s ease}
@@ -93,7 +94,7 @@ kbd{font-family:var(--f-mono);font-size:10px;color:var(--dim);border:1px solid v
 .btn.ready{border-color:var(--violet);color:var(--violet);box-shadow:0 0 12px rgba(178,148,230,.18)}
 .btn.cool{color:var(--dim)}
 .hoodb{display:none;grid-column:1/-1}
-.galrow{margin:14px 0 4px}.galrow>b{display:block;margin-bottom:6px;font-size:15px}.galtiles{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}.galtiles.all{grid-template-columns:1fr}.galtiles.seas{grid-template-columns:repeat(4,1fr)}.galt.ts{aspect-ratio:9/16}.galt.ts span small{font-size:11px;color:var(--dim)}.galt.tall{aspect-ratio:16/9}.galt{appearance:none;padding:0;border:1px solid var(--ash);border-radius:4px;background:#0f0b09;overflow:hidden;cursor:pointer;display:flex;align-items:center;justify-content:center}.galt{aspect-ratio:3/4}.galt.t1 img,.galt.t3 img{object-position:50% 30%}.galt img{width:100%;height:100%;object-fit:cover;display:block}.galt.lock{cursor:default}.galt{position:relative}.galt .ghost{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(.36) blur(5px) saturate(.5);transform:scale(1.12)}.galt.lock span{position:relative;z-index:1;text-shadow:0 1px 3px #000}html[lang^=zh] .galt.lock span{white-space:nowrap;padding:4px 0;letter-spacing:0}html[lang=ja] .galt.lock span{padding:4px 2px;letter-spacing:0;line-height:1.35}@media (max-width:370px){.galt.lock span{font-size:9.5px!important}}html[lang=en] .galt.lock span{font-size:10px;padding:4px 3px;line-height:1.35}.galt.gpaid{cursor:pointer;opacity:.75}.galt.gpaid .fbadge{margin:0;white-space:nowrap;font-size:10px;padding:1px 5px;letter-spacing:0}.galt.lock span{font-size:11px;color:var(--dim);padding:6px;text-align:center;line-height:1.5}.galview img{display:block;max-width:100%;max-height:70vh;margin:0 auto;border-radius:4px}a.btn{text-decoration:none;color:var(--bone)}
+.galrow{margin:14px 0 4px}.galrow>b{display:block;margin-bottom:6px;font-size:15px}.galtiles{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}.galtiles.all{grid-template-columns:1fr}.galtiles.seas{grid-template-columns:repeat(4,1fr)}.galt.ts{aspect-ratio:9/16}.galt.ts span small{font-size:11px;color:var(--dim)}.galt.tall{aspect-ratio:16/9}.galt{appearance:none;padding:0;border:1px solid var(--ash);border-radius:4px;background:#0f0b09;overflow:hidden;cursor:pointer;display:flex;align-items:center;justify-content:center}.galt{aspect-ratio:3/4}.galt.t1 img,.galt.t3 img{object-position:50% 30%}.galt img{width:100%;height:100%;object-fit:cover;display:block}.galt.lock{cursor:default}.galt{position:relative}.galt .ghost{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(.36) blur(5px) saturate(.5);transform:scale(1.12)}.galt.lock span{position:relative;z-index:1;text-shadow:0 1px 3px #000}html[lang^=zh] .galt.lock span{white-space:nowrap;padding:4px 0;letter-spacing:0}html[lang=ja] .galt.lock span{padding:4px 2px;letter-spacing:0;line-height:1.35}@media (max-width:370px){.galt.lock span{font-size:9.5px!important}}html[lang=en] .galt.lock span{font-size:10px;padding:4px 3px;line-height:1.35}.galt.gpaid{cursor:pointer;opacity:.75}.galt.gpaid .fbadge{margin:0;white-space:nowrap;font-size:9px;padding:1px 3px;letter-spacing:0;max-width:100%;overflow:hidden;text-overflow:ellipsis;box-sizing:border-box}html[lang=en] .galt.gpaid .fbadge{font-size:8px;padding:1px 2px;letter-spacing:-.02em}.galt.lock span{font-size:11px;color:var(--dim);padding:6px;text-align:center;line-height:1.5}.galview img{display:block;max-width:100%;max-height:70vh;margin:0 auto;border-radius:4px}a.btn{text-decoration:none;color:var(--bone)}
 .choice.paid{cursor:pointer}.fbadge{margin-left:8px;font-size:11px;font-weight:700;letter-spacing:.08em;padding:1px 8px;border:1px solid var(--ember);border-radius:999px;color:var(--ember);vertical-align:3px}.fthumbs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:4px 0 10px}@media (min-width:600px){.fthumbs{grid-template-columns:repeat(6,1fr)}.fthumbs figcaption{font-size:11px;letter-spacing:.04em}}.fthumbs figure{position:relative;margin:0;aspect-ratio:1;border:1px solid var(--ash);border-radius:4px;overflow:hidden;background:#0f0b09}.fthumbs img{width:100%;height:100%;object-fit:cover;display:block}.fthumbs figcaption{position:absolute;left:0;right:0;bottom:0;padding:10px 6px 4px;font-size:12px;letter-spacing:.1em;text-align:center;color:var(--bone);background:linear-gradient(to bottom,transparent,rgba(0,0,0,.75))}
 .bkbox{width:100%;box-sizing:border-box;margin:0 0 8px;padding:8px 10px;border:1px solid var(--ash);border-radius:4px;background:#0f0c0a;color:var(--bone);font:12px/1.5 var(--f-mono);word-break:break-all;resize:vertical;-webkit-user-select:text;user-select:text}
 .fulll{margin:8px 0 0 1.2em;padding:0;line-height:1.9;color:var(--dim)}
@@ -639,6 +640,7 @@ const gearVal=it=>it?it.v+it.e:0;
 // 強化留在裝備上；寶石鑲在裝備欄，換裝時拆回寶石袋
 const gearTier=it=>{if(!it)return -1;const TB=it.cat==='weapon'?WEAP:ARMR;return TB.findIndex(t=>it.id?t.id===it.id:t.n===it.n)};
 // 存檔裡的裝備用代號記錄；讀檔時依目前語言補上名稱，舊存檔則用名稱找回代號
+document.documentElement.lang=LANG_ID;
 function relocalize(){const fix=it=>{if(!it||(it.cat!=='weapon'&&it.cat!=='armor'))return;const TB=it.cat==='weapon'?WEAP:ARMR;const t=TB.find(q=>it.id?q.id===it.id:q.n===it.n);if(t){it.id=t.id;it.n=t.n}};
  fix(P.weap);fix(P.armr);P.inv.forEach(fix);(G.items||[]).forEach(fix);for(const f of (G.feats||[]))if(f.offers)f.offers.forEach(o=>fix(o.it))}
 const sockets=it=>!it?0:gearTier(it)>=3?2:1;
@@ -677,7 +679,7 @@ const occupied=(x,y)=>!passable(x,y)||!!monAt(x,y)||(P.x===x&&P.y===y)||!!featAt
 /* ================= 訊息與效果 ================= */
 const MC={bone:'#efe3cc',dim:'#9a8b77',blood:'#ee6a5c',ember:'#ffab5c',oil:'#e9b949',jade:'#7ed3b6',violet:'#c2a6f0'};
 function msg(t,c='bone'){const last=G.log[G.log.length-1];if(last&&last[0]===t){last[2]=(last[2]||1)+1;renderLog();return}G.log.push([t,c]);if(G.log.length>80)G.log.shift();renderLog()}
-function renderLog(){const el=$('#log');if(!G){el.innerHTML='';return}const lv1=G.log.slice(-4);el.innerHTML=lv1.map((m,i)=>`<p style="color:${MC[m[1]]||m[1]};opacity:${0.45+0.55*(i+1)/lv1.length}">${m[0]}${m[2]>1?' ×'+m[2]:''}</p>`).join('')}
+function renderLog(){const el=$('#log');if(!G){el.innerHTML='';return}el.classList.remove('quiet');clearTimeout(renderLog.t);renderLog.t=setTimeout(()=>el.classList.add('quiet'),4500);const lv1=G.log.slice(-4);el.innerHTML=lv1.map((m,i)=>`<p style="color:${MC[m[1]]||m[1]};opacity:${0.45+0.55*(i+1)/lv1.length}">${m[0]}${m[2]>1?' ×'+m[2]:''}</p>`).join('')}
 function fxText(x,y,text,color){if(FX.length>400)return;FX.push({k:'t',x:x+.5,y:y+.2,text,color,life:1,max:1})}
 function fxBurst(x,y,color,n=10,spd=3){if(FX.length>400)return;for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2,s=Math.random()*spd+.5;FX.push({k:'p',x:x+.5,y:y+.5,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:.4+Math.random()*.4,max:.8,color,size:Math.random()*.08+.04})}}
 // 技能特效：擴散光環、光束、閃光、大字
@@ -1007,7 +1009,7 @@ function killMon(m,byPlayer){const M=MON[m.k];m.hp=0;sfx('kill:'+m.k);if(STYLE==
  if((m.k==='skel'||m.k==='archer')&&!m.reformed&&!m.summoned&&!(m.st.burn>0)&&!(byPlayer&&G.cls==='ferry')&&chance(m.k==='skel'?.4:.2)){G.bones=G.bones||[];G.bones.push({x:m.x,y:m.y,t:4,k:m.k});if(vis[idx(m.x,m.y)])msg(L["t0252"],'dim')}
  if(m.k==='guard'&&relicPool().length)dropNear({cat:'relic',k:pick(relicPool())},m.x,m.y);
  if(m.k==='guard'&&G.seal&&G.seal.kind==='guard'){G.seal.done=true;msg(L["t0253"],'ember');sfx('magic')}
- if(m.k==='devour'){G.midDown=true;if(G.seal)G.seal.done=true;msg(L["t0254"],'ember');shake=reduceMotion?0:12;sfx('boom');
+ if(m.k==='devour'){G.midDown=true;if(!G.daily){const r=loadKey(REC_KEY)||{};r.cls5=r.cls5||[];if(!r.cls5.includes(G.cls)){r.cls5.push(G.cls);store(REC_KEY,r);if(galOpen(G.cls))setTimeout(()=>msg(tr("ui_gal_new",1),'violet'),0)}}   /* 畫廊：這個職業第一次打敗第 5 層的頭目 → 特寫（r.cls5 是舊名稱） */if(G.seal)G.seal.done=true;msg(L["t0254"],'ember');shake=reduceMotion?0:12;sfx('boom');
   for(let i=0;i<2;i++)dropNear(genGear(chance(.5)?'weapon':'armor',G.depth+1),m.x,m.y);dropNear({cat:'oil',n:1},m.x,m.y);dropNear({cat:'gem',k:pick(GEMK)+':2'},m.x,m.y);G.pendingPerks++;G.pendingRelic=true;msg(L["t0255"],'violet')}
  if(M.boss){buzz('heavy');msg(L["t0256"],'ember');msg(L.lw_cold||L["t0257"],'ember');setTimeout(lastWords,700);{const h={cat:'heart'};const keep=G.items.filter(i=>i.x===m.x&&i.y===m.y);if(keep.length)dropNear(h,m.x,m.y);else G.items.push(Object.assign(h,{x:m.x,y:m.y,seen:1}));h.seen=1}shake=reduceMotion?0:14;sfx('boom')}
  if(byPlayer&&rel('cup'))healPlayer(2);
@@ -1291,7 +1293,7 @@ function interact(){
  msg(found?tr("t0331",found):L["t0332"],found?'oil':'dim');endTurn()}
 function descend(){
  if(G.depth>=10)return;
- if(sealed()){msg(G.seal.kind==='brazier'?tr("t0333",G.seal.lit,G.seal.need):G.seal.kind==='mid'?L["t0334"]:L["t0335"],'violet');return}G.depth++;auto=null;genFloor();fov();sfx('stairs');if(G.depth===5&&!G.daily){const r=loadKey(REC_KEY)||{};r.cls5=r.cls5||[];if(!r.cls5.includes(G.cls)){r.cls5.push(G.cls);store(REC_KEY,r);if(galOpen(G.cls))msg(tr("ui_gal_new",1),'violet')}}   // 畫廊：這個職業第一次走到第 5 層 → 特寫
+ if(sealed()){msg(G.seal.kind==='brazier'?tr("t0333",G.seal.lit,G.seal.need):G.seal.kind==='mid'?L["t0334"]:L["t0335"],'violet');return}G.depth++;auto=null;genFloor();fov();sfx('stairs');
  msg(tr("t0336",G.depth,FLOORS[G.depth]),'ember');vignette(descendArt(G.depth),FLOORS[G.depth],null,1700);msg(FLAVOR[G.depth],'dim');
  banner(tr("t0337",NUM[G.depth]),FLOORS[G.depth]+(G.cave?L["t0338"]:''));
  if(G.cave)msg(L["t0339"],'dim');
@@ -1436,7 +1438,7 @@ const CLASS_ORDER=['blade','lamp','miko','monk','shadow','rune','berserk','ferry
 function clsWinsOf(r){if(!r.clsWins){// 舊紀錄沒有記哪個職業通關：照通關次數依序算，再加上困難通關過的
   const n=Math.min(r.wins||0,CLASS_ORDER.length-1);r.clsWins=[...new Set([...CLASS_ORDER.slice(0,n),...(r.hardCls||[])])]}return r.clsWins}
 // 解鎖：通關前一個職業就解鎖下一個；已經通關過的職業一定保持解鎖（順序調整過也不會把舊存檔鎖回去）
-function unlockedCls(r){if(TESTMODE===1)return[...CLASS_ORDER];const w=clsWinsOf(r);return CLASS_ORDER.filter((id,i)=>i===0||w.includes(id)||w.includes(CLASS_ORDER[i-1]))}
+function unlockedCls(r){if(TESTMODE===1)return[...CLASS_ORDER];const w=clsWinsOf(r);return CLASS_ORDER.filter((id,i)=>i===0||w.includes(id)||w.includes(CLASS_ORDER[i-1])||(clsPaid(id)&&isFull()))}   // 完整版：六個付費職業買了就能玩，不用依序通關（免費的兩個照舊）
 const clsById=id=>CLASSES.find(c=>c.id===id);
 function scoreOf(){return G.depth*100+G.gold+G.kills*10+P.lvl*20+(G.won?2000:0)}
 function finishRun(){let fw=false;const r=loadKey(REC_KEY)||{best:0,hi:0,wins:0,runs:0};clsWinsOf(r);r.best=Math.max(r.best,G.depth);const s=scoreOf();const isHi=s>r.hi;r.hi=Math.max(r.hi,s);if(G.won){r.wins++;fw=r.wins===1;if(G.diff==='hard')r.winsHard=(r.winsHard||0)+1}
@@ -1464,7 +1466,8 @@ function deathStory(cause){const d=G.depth,r=loadKey(REC_KEY)||{},first=(r.runs|
  const f='';
  return `<div class="story"><p>${a}</p><p>${b}</p>${c?`<p>${c}</p>`:''}</div>${f}`}
 function dieFinal(cause){const e=finishRun(),{s,isHi}=e;
- (()=>openModal(tr("t0436",clsOf().n,dif().n,NUM[G.depth],FLOORS[G.depth],cause,deathStory(cause),statsHTML(),emberLine(e)+(e.newCls?(!isFull()&&clsPaid(e.newCls)?`<p class="unlock">${tr("ui_full_next",clsById(e.newCls).n)}</p><div class="row"><button class="btn small" id="vFull" type="button">${L.ui_full_see}</button></div>`:`<p class="unlock">${tr("ui_cls_new",clsById(e.newCls).n)}</p>`):'')+(e.newAsc?`<p class="unlock">${tr("ui_asc_new",e.newAsc)}</p>`:''),isHi?L["t0437"]:'',G.daily?L["t0438"]+G.daily:''),false,()=>{const d=!!G.daily,c=G.cls;$('#mNew').onclick=()=>newGame(d,c,G.diff);$('#mNew').textContent=L["t0439"];$('#mCls').onclick=()=>classModal(d);$('#mTitle').onclick=showTitle}))()}
+ (()=>openModal(tr("t0436",clsOf().n,dif().n,NUM[G.depth],FLOORS[G.depth],cause,deathStory(cause),statsHTML(),emberLine(e)+(e.newCls?(!isFull()&&clsPaid(e.newCls)?`<p class="unlock">${tr("ui_full_next",clsById(e.newCls).n)}</p><div class="row"><button class="btn small" id="vFull" type="button">${L.ui_full_see}</button></div>`:`<p class="unlock">${tr("ui_cls_new",clsById(e.newCls).n)}</p>`):'')+(e.newAsc?`<p class="unlock">${tr("ui_asc_new",e.newAsc)}</p>`:''),isHi?L["t0437"]:'',G.daily?L["t0438"]+G.daily:''),false,()=>{const d=!!G.daily,c=G.cls;$('#mNew').onclick=()=>newGame(d,c,G.diff);$('#mNew').textContent=L["t0439"];$('#mCls').onclick=()=>classModal(d);$('#mTitle').onclick=showTitle;
+  {const r=loadKey(REC_KEY)||{},up=r.up||{};if(UPG.some(u=>(up[u.id]||0)<u.max&&(r.embers||0)>=u.cost[up[u.id]||0])){const b=document.createElement('button');b.className='btn hot';b.type='button';b.textContent=L.ui_go_workshop;b.onclick=()=>{showTitle();workshopModal()};$('#mNew').classList.remove('hot');$('#mNew').before(b)}}}))()}
 function lampEnding(){const carried=P.lamps;if(!carried.length&&!G.dzUp)return '';
  // 冬至跟著上來時，小滿的燈是他自己提上去的；他和小滿兩行由他自己劃掉，之後他的燈不再出現，第十層也換人看攤
  const r=loadKey(REC_KEY)||{};r.lampsHome=[...new Set([...(r.lampsHome||[]),...carried,...(G.dzUp?['xiaoman','dongzhi']:[])])];if(G.dzUp)r.dzHome=1;store(REC_KEY,r);
@@ -1499,6 +1502,7 @@ function newGame(daily,clsId,diff){document.body.classList.remove('ontitle');
  closeModal(true);banner(L["t0448"],FLOORS[1]);musMode();save();updateHUD();
  if(r.runs===1)openModal(tr("t0449",INTRO),true,()=>{$('#inOk').onclick=()=>closeModal()})}
 function save(){if(!G||G.over)return;G.rs=RS;store(SAVE_KEY,G)}
+function validSave(g){return !!(g&&g.P&&typeof g.P.hp==='number'&&typeof g.P.x==='number'&&Array.isArray(g.mons)&&Array.isArray(g.feats)&&Array.isArray(g.items)&&Array.isArray(g.log)&&g.map&&g.depth>=1&&g.cls)}   // 缺欄位的存檔（例如改版後格式不同）當作沒有存檔
 function resume(g){document.body.classList.remove('ontitle');G=g;P=G.P;ensureP();relocalize();
  // 讀檔：清掉畫面用的暫時狀態（時間點屬於上一次開啟的計時器，留著會讓角色一直閃白、抖動）
  for(const e of[P,...(G.mons||[])]){delete e.hitT;delete e.atkT;delete e.tt0;delete e.fx;delete e.fy;e.vx=e.tx=e.x;e.vy=e.ty=e.y;e.bx=e.by=0}if(G.scrMap&&G.scrMap.douse===undefined)G.scrMap.douse=8;RS=G.rs||RS;FX=[];closeModal(true);
@@ -1625,13 +1629,14 @@ function journalModal(back){const r=loadKey(REC_KEY)||{};const got=r.pages||[];c
    return `<p><b style="color:${c.c}">${c.n}</b></p>`+[1,2,3].filter(i=>got.includes(i)).map(i=>`<p><b style="color:var(--ember)">${L['cs_'+id+'_o'+i]}　</b>${L['cs_'+id+'_m'+i]}</p>`).join('')}).join('')}</div>`)})}
 function classModal(daily){
  const rec=loadKey(REC_KEY)||{},cw=TESTMODE===1?[...CLASS_ORDER]:clsWinsOf(rec),hardOpen=cw.length>0&&isFull(),hardCls=rec.hardCls||[],unl=unlockedCls(rec),canPlay=id=>unl.includes(id)&&(isFull()||!clsPaid(id))&&(diff!=='hard'||cw.includes(id));   // 困難：要先用普通通關過這個職業
+ const nextCls=isFull()&&cw.length?CLASS_ORDER.find(id=>!cw.includes(id)):null;   // 照故事順序輪到的下一位：標「推薦」
  let diff=daily?'normal':(loadKey(DIFF_KEY)||'normal');if(!DIFF[diff]||(diff==='hard'&&!hardOpen))diff='normal';
  const ascMax=Math.min(ASC_MAX,rec.ascMax||0);let selAsc=Math.min(ascMax,Math.max(0,+(loadKey(ASC_KEY)||0)));
  const ascHTML=()=>`<div class="ascrow"><button class="btn small" id="aMinus" type="button" ${selAsc<=0?'disabled':''}>−</button><b>${selAsc?tr("ui_asc_lv",selAsc):L.ui_asc_none}</b><button class="btn small" id="aPlus" type="button" ${selAsc>=ascMax?'disabled':''}>+</button></div>`+
   (selAsc?`<ol class="ascl">${Array.from({length:selAsc},(_,i)=>`<li>${L['asc_'+(i+1)]}</li>`).join('')}</ol>`:`<p class="tiny">${L.ui_asc_hint}</p>`);
  const clsText=c=>{const[trait,kit]=c.desc.split(L["t0476"]);return tr("t0477",trait.trim(),SKILLS[c.id].n,SKILLS[c.id].d,SKILLS[c.id].cd,kit||'')};
  openModal(tr("t0478",daily?tr("t0479",todayStr())
-  :tr("t0480",Object.entries(DIFF).map(([id,v])=>`<button class="tab" role="radio" type="button" data-diff="${id}" aria-selected="${diff===id}" aria-checked="${diff===id}" ${id==='hard'&&!hardOpen&&isFull()?'disabled':''}>${v.n}${id==='hard'&&!hardOpen?(isFull()?L["t0481"]:`<small>${L.ui_full_tag}</small>`):''}</button>`).join(''),DIFF[diff].d,hardOpen?'':isFull()?L["t0482"]:L.ui_full_hard),CLASS_ORDER.map(clsById).map((c,i)=>canPlay(c.id)||(!isFull()&&clsPaid(c.id)&&unl.includes(c.id))?tr("t0483",c.id,c.c,c.g,c.n+(!isFull()&&clsPaid(c.id)?`<small class="fbadge">${L.ui_full_tag}</small>`:''),hardCls.includes(c.id)?L["t0484"]:'',c.hp,c.atk,clsText(c))
+  :tr("t0480",Object.entries(DIFF).map(([id,v])=>`<button class="tab" role="radio" type="button" data-diff="${id}" aria-selected="${diff===id}" aria-checked="${diff===id}" ${id==='hard'&&!hardOpen&&isFull()?'disabled':''}>${v.n}${id==='hard'&&!hardOpen?(isFull()?L["t0481"]:`<small>${L.ui_full_tag}</small>`):''}</button>`).join(''),DIFF[diff].d,hardOpen?'':isFull()?L["t0482"]:L.ui_full_hard),CLASS_ORDER.map(clsById).map((c,i)=>canPlay(c.id)||(!isFull()&&clsPaid(c.id))?tr("t0483",c.id,c.c,c.g,c.n+(!isFull()&&clsPaid(c.id)?`<small class="fbadge">${L.ui_full_tag}</small>`:c.id===nextCls?`<small class="fbadge">${L.ui_cls_next}</small>`:''),hardCls.includes(c.id)?L["t0484"]:'',c.hp,c.atk,clsText(c))
    :tr("t0483",c.id,'#5a524a',c.g,c.n+(!isFull()&&clsPaid(c.id)?`<small class="fbadge">${L.ui_full_tag}</small>`:''),'',c.hp,c.atk,!isFull()&&clsPaid(c.id)?tr('ui_full_cls_lock',clsById(CLASS_ORDER[i-1]).n):unl.includes(c.id)?tr("ui_hard_need",c.n):tr("ui_cls_locked",clsById(CLASS_ORDER[i-1]).n)).replace('<button class="choice"','<button class="choice locked" disabled')).join('')),false,()=>{
   $('#cBack').onclick=showTitle;
   const ascBox=()=>{let el=$('#ascBox');if(!el){el=document.createElement('div');el.id='ascBox';$('#diffDesc')&&$('#diffDesc').after(el)}
@@ -1646,10 +1651,10 @@ function classModal(daily){
   if(STYLE==='pixel'&&!reduceMotion){clearInterval(classModal.walkT);let fi=0;const imgs=[...$('#sheet').querySelectorAll('[data-c]')].filter(b=>unl.includes(b.dataset.c)).map(b=>{const A=window.EMBER_ANIM&&EMBER_ANIM['player_'+b.dataset.c],im=b.querySelector('.cg img');return A&&A.walk&&im?[im,A.walk.f]:null}).filter(Boolean);
    if(imgs.length)classModal.walkT=setInterval(()=>{if(!imgs[0][0].isConnected){clearInterval(classModal.walkT);return}fi=(fi+1)%4;for(const[im,f]of imgs)im.src=f[fi%f.length]},170)}
   $('#sheet').querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{if(canPlay(b.dataset.c))newGame(daily,b.dataset.c,diff)});
-  // 免費版：完整版的職業卡片可以點，點了打開購買說明；照順序還沒輪到的維持鎖定樣式（買了也要先通關前一個），不讓人誤以為買了就能玩
+  // 免費版：完整版的職業卡片都是全彩櫥窗，點了打開購買說明（買了就能玩）
   if(!isFull())$('#sheet').querySelectorAll('[data-c]').forEach(b=>{if(clsPaid(b.dataset.c)){b.disabled=false;b.classList.add('paid');b.onclick=()=>fullModal(()=>classModal(daily))}})})}
 function showTitle(){G=null;P=null;FX=[];document.body.classList.add('ontitle');document.body.classList.remove('crit');document.querySelectorAll('.bar.low').forEach(b=>b.classList.remove('low'));renderLog();musMode();
- const r=loadKey(REC_KEY)||{best:0,hi:0,wins:0,runs:0},sv=loadKey(SAVE_KEY);
+ const r=loadKey(REC_KEY)||{best:0,hi:0,wins:0,runs:0};let sv=loadKey(SAVE_KEY);if(sv&&!validSave(sv)){store(SAVE_KEY,null);sv=null}
  openModal(tr("t0485",sv&&(!sv.over||sv.dying)?tr("t0486",(CLASSES.find(c=>c.id===sv.cls)||CLASSES[0]).n,(DIFF[sv.diff]||DIFF.normal).n,NUM[sv.depth],sv.P.lvl,sv.P.hp,sv.P.mhp):'',sv&&(!sv.over||sv.dying)?L["t0487"]:'',todayStr(),r.embers||0,(r.pages||[]).length,r.best,r.hi,r.wins,r.winsHard||0,(r.hardCls||[]).length,r.runs,MUS.on,MUS.on?L["g_開"]:L["g_關"],soundOn,soundOn?L["g_開"]:L["g_關"]),false,()=>{
   if($('#tCont'))$('#tCont').onclick=()=>resume(sv);
   $('#tSet').onclick=()=>settingsModal(showTitle);
@@ -1678,7 +1683,7 @@ function gpButton(i){if(VIG){closeVig();return}
  switch(i){case 0:doInteract();break;case 1:doMove(0,0);break;case 2:doSkill();break;case 3:if(canAct()){selSock=null;invModal()}break;
   case 4:toggleHood();break;case 5:doExplore();break;case 6:useQuick(0);break;case 7:useQuick(1);break;
   case 8:doInteract();break;case 9:if(canAct())menuModal();break}}
-function gpPoll(now){const pads=navigator.getGamepads?[...navigator.getGamepads()]:[];const gp=pads.find(p=>p&&p.connected);
+function gpPoll(now){if(!GP.on&&now-(gpPoll.t||0)<1000){requestAnimationFrame(gpPoll);return}gpPoll.t=now;const pads=navigator.getGamepads?[...navigator.getGamepads()]:[];const gp=pads.find(p=>p&&p.connected);
  if(gp){if(!GP.on){GP.on=true;document.body.classList.add('gp');if(G&&!G.over)msg(L.ui_gp_on,'dim')}
   gp.buttons.forEach((bt,i)=>{const pr=bt.pressed||bt.value>.6;if(i>=12&&i<=15){GP.down[i]=pr;return}if(pr&&!GP.down[i])gpButton(i);GP.down[i]=pr});
   const d=gpDir(gp),key=d?d.join(','):null;
@@ -1737,7 +1742,7 @@ function fullModal(back){
 function aboutModal(back){
  openModal(`<h2>${L.ui_about}</h2><p class="dim" id="abVer" style="margin-top:-4px">${L.app_name} · ${L.ui_version} ${VERSION}${testLabel()}</p>
  ${CREDIT?`<h3>${L.ui_made}</h3><p>${CREDIT}</p>`:''}
- <p>${L.ui_privacy_short}</p>
+ <p>${L.ui_privacy_short}</p><p style="font-size:13px">${L.ui_privacy_link}<br><span style="user-select:all;-webkit-user-select:all">ember.sanbaofang.com/privacy</span><br>${L.ui_support_mail}<br><span style="user-select:all;-webkit-user-select:all">hello@sanbaofang.com</span></p><p class="dim" style="font-size:12px">${L.ui_ai_note}</p>
  <h3>${L.ui_fonts}</h3><p style="font-size:13px;line-height:1.7">${FONT_CREDITS.map(([f,a])=>`${f} — ${a}`).join('<br>')}</p><p class="dim" style="font-size:12px">${L.ui_fonts_note}</p>
  <h3>${L.ui_sfx_title}</h3><p style="font-size:13px;line-height:1.7">Kenney — RPG sounds (CC0)<br>artisticdude — RPG Sound Pack (CC0)</p>
  <div class="row" style="margin-top:14px"><button class="btn" id="abBack" type="button">${L.ui_back}</button></div>${TESTMODE?`<div class="row" style="margin-top:12px;gap:8px;flex-wrap:wrap"><button class="btn small" id="tRenew" type="button">RENEW：重設工坊與燈城</button><button class="btn small" id="tEmb" type="button">＋1000 餘燼</button></div><p class="tiny" id="tNote"></p>`:''}`,false,()=>{$('#abBack').onclick=back;bindTestTap(()=>aboutModal(back));
@@ -2006,7 +2011,7 @@ const VFX={
  devour:[['lumen',75,80,1.2,2.6],['motes',46,58,16,18,'255,220,170'],['motes',56,38,14,14,'255,225,180']],
  dzreveal:[['flick',80,32,10],['flick',42,73,8]]};
 function vfx(st,list,SW,SH){const cv=document.createElement('canvas');cv.className='vfx';st.appendChild(cv);
- const dpr=Math.min(1.5,devicePixelRatio||1);cv.width=Math.round(SW*dpr);cv.height=Math.round(SH*dpr);const g=cv.getContext('2d');g.scale(dpr,dpr);
+ const dpr=1;cv.width=Math.round(SW*dpr);cv.height=Math.round(SH*dpr);const g=cv.getContext('2d');g.scale(dpr,dpr);
  const P=(x,y)=>[x/100*SW,y/100*SH],smk=[];let last=performance.now();
  const n=(t,a)=>.5+.22*Math.sin(t*7.3+a)+.16*Math.sin(t*12.9+a*2)+.12*Math.sin(t*3.1+a*3);   // 不規則的火光
  const glow=(x,y,r,col,al)=>{const gr=g.createRadialGradient(x,y,0,x,y,r);gr.addColorStop(0,`rgba(${col},${al})`);gr.addColorStop(1,`rgba(${col},0)`);g.fillStyle=gr;g.fillRect(x-r,y-r,r*2,r*2)};
@@ -2030,8 +2035,8 @@ function vfx(st,list,SW,SH){const cv=document.createElement('canvas');cv.classNa
     g.globalCompositeOperation='lighter';glow(x+ox,y,R*.42,'255,150,60',.035+.06*f);glow(x+ox*.5,y,.09*SW,'255,200,120',.10+.12*f)}
    else if(e[0]==='lumen'){if(!e.m){const im=st.querySelector('img'),mw=480,mh=Math.round(mw*SH/SW),oc=document.createElement('canvas');oc.width=mw;oc.height=mh;const o=oc.getContext('2d');
      try{o.drawImage(im,0,0,mw,mh);const d=o.getImageData(0,0,mw,mh),a=d.data,th=e[1],ym=e[2]/100*mh;for(let p=0;p<a.length;p+=4){const yy=(p/4/mw)|0,L=.3*a[p]+.59*a[p+1]+.11*a[p+2];
-      if(yy>ym||L<th||a[p]<a[p+2]*(e[3]||1.05))a[p+3]=0;else a[p+3]=Math.min(255,(L-th)/(255-th)*255*(e[4]||1.6))}o.putImageData(d,0,0);e.m=oc}catch(err){e.m=-1}}
-    if(e.m!==-1){g.globalCompositeOperation='lighter';const br=(.5+.5*Math.sin(t*1.25))*(.85+.3*n(t,ei)-.15),bo=.004*SW;g.globalAlpha=.05+.24*br;g.drawImage(e.m,0,0,SW,SH);g.globalAlpha=.02+.10*br;for(const[dx,dy]of[[bo,0],[-bo,0],[0,bo],[0,-bo]])g.drawImage(e.m,dx,dy,SW,SH);g.globalAlpha=1}}
+      if(yy>ym||L<th||a[p]<a[p+2]*(e[3]||1.05))a[p+3]=0;else a[p+3]=Math.min(255,(L-th)/(255-th)*255*(e[4]||1.6))}o.putImageData(d,0,0);e.m=oc;const gc=document.createElement('canvas');gc.width=mw;gc.height=mh;const gg=gc.getContext('2d'),bo=Math.max(1,Math.round(.004*mw));for(const[dx,dy]of[[bo,0],[-bo,0],[0,bo],[0,-bo]])gg.drawImage(oc,dx,dy);e.g=gc}catch(err){e.m=-1}}
+    if(e.m!==-1){g.globalCompositeOperation='lighter';const br=(.5+.5*Math.sin(t*1.25))*(.85+.3*n(t,ei)-.15);g.globalAlpha=.05+.24*br;g.drawImage(e.m,0,0,SW,SH);g.globalAlpha=.02+.10*br;g.drawImage(e.g,0,0,SW,SH);g.globalAlpha=1}}
    else if(e[0]==='glint'){const ph=(t%3.4)/3.4;if(ph<.14){const a=Math.sin(ph/.14*Math.PI),r=.022*SW;g.globalCompositeOperation='lighter';
     for(const d of[-1,1]){const gx=x+d*.012*SW;glow(gx,y,r,'255,190,120',.55*a);g.strokeStyle=`rgba(255,235,200,${.7*a})`;g.lineWidth=1.2;g.beginPath();g.moveTo(gx-r*1.6,y);g.lineTo(gx+r*1.6,y);g.moveTo(gx,y-r*.8);g.lineTo(gx,y+r*.8);g.stroke()}}}});
   g.globalCompositeOperation='source-over';requestAnimationFrame(tick)};
@@ -2086,7 +2091,11 @@ function autoTick(){
  if(!auto||!canAct()){auto=null;return}
  if(auto.kind==='explore'){
   if(anyVisibleMon()&&auto.steps){msg(L["t0590"],'blood');auto=null;return}
+  {const z=G.mons.find(m=>m.hp>0&&m.asleep&&!m.autoSeen&&monVisible(m)&&vis[idx(m.x,m.y)]);if(z){for(const m of G.mons)if(m.asleep&&vis[idx(m.x,m.y)])m.autoSeen=1;msg(tr('ui_auto_sleep',MON[z.k].n),'oil');auto=null;return}}   // 看到睡著的怪物：停下來讓玩家決定（偷襲或繞開），每隻只停一次
   let path=explorePath();
+  if(!path&&sealed()&&G.seal.kind==='brazier'){const un=G.feats.filter(f=>f.kind==='brazier'&&!f.lit&&G.seen[idx(f.x,f.y)]);
+   if(un.length){if(un.some(f=>cheb(f.x,f.y,P.x,P.y)===1)){msg(L.ui_auto_light,'ember');auto=null;return}
+    const bp=bfsPath((x,y)=>un.some(f=>cheb(f.x,f.y,x,y)===1));if(bp){if(!auto.toBraz){msg(tr('ui_auto_braz',G.seal.need-G.seal.lit),'ember');auto.toBraz=true}path=bp}}}
   if(!path){const onSt=tile(P.x,P.y)===T.STAIRS;if(onSt){msg(sealed()?tr("t0591",sealText()):L["t0592"],'ember');auto=null;return}
    path=bfsPath((x,y)=>tile(x,y)===T.STAIRS);if(!path){msg(G.depth===10?L["t0593"]:L["t0594"],'dim');auto=null;return}
    if(!auto.toStairs){msg(L["t0595"],'dim');auto.toStairs=true}}
@@ -2291,7 +2300,9 @@ const FLYERS={moth:1,bat:1,shade:1,wraith:1};
 function bobOf(sk,x,y){const fly=FLYERS[sk],t=performance.now()/(fly?170:460)+x*.013+y*.007;const f=Math.floor(t)%(fly?4:2);return fly?[0,-1,-2,-1][f]:-f}
 function glyph(ch,x,y,color,size=.74,alpha=1,glow=0,sk=null,tint=null,dim=false,bob=false){if(sk&&STYLE==='pixel'&&((SPR&&SPR[sk])||artImg[sk])){if(bob&&!reduceMotion&&!artImg[sk])y+=bobOf(sk,x,y)*TS*Math.min(1.25,size*1.25)/12;drawSprite(sk,tint,x,y,size,dim?alpha*.4:alpha,color,glow);return}ctx.globalAlpha=alpha;ctx.font=`900 ${Math.round(TS*size)}px ${FONT_G}`;ctx.fillStyle=color;if(glow){ctx.shadowColor=color;ctx.shadowBlur=glow}ctx.fillText(ch,x+TS/2,y+TS/2+TS*.04);ctx.shadowBlur=0;ctx.globalAlpha=1}
 let lastT=0;
-function draw(now){requestAnimationFrame(draw);const dt=Math.min(.05,(now-lastT)/1000||0);lastT=now;
+function draw(now){requestAnimationFrame(draw);
+ if((VIG&&VIG.el.classList.contains('on')&&VIG.el.classList.contains('loaded'))||(!G&&EVENTS.title&&document.body.classList.contains('ontitle')))return;   // 整個畫面被劇情圖或標題背景蓋住：不重畫（省電）
+ if(modalOpen&&now-(draw.last||0)<80)return;draw.last=now;const dt=Math.min(.05,(now-lastT)/1000||0);lastT=now;
  ctx.setTransform(DPR,0,0,DPR,0,0);ctx.fillStyle='#0c0a09';ctx.fillRect(0,0,VW,VH);
  if(!G){drawIdle(now,dt);return}
  // 平滑位置
