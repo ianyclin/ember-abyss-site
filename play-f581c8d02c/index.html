@@ -1724,7 +1724,7 @@ function bindStyle(id,again){const b=$('#'+id);if(b)b.onclick=()=>{STYLE=STYLE==
 const VERSION='1.0.0',CREDIT='指數三寶飯';   // CREDIT：上架前填上你要顯示的名字或工作室名稱
 const FONT_CREDITS=[['Noto Serif TC / SC / JP','Google'],['LXGW WenKai TC','LXGW'],['Ma Shan Zheng','Ma Shan Zheng'],['Shippori Mincho B1','FONTDASU'],['Cinzel','Natanael Gama'],['Crimson Pro','Jacques Le Bailly'],['IBM Plex Mono','IBM']];
 // 測試模式：在「關於」連點版本號 5 次切換。所有職業解鎖、每個職業都能選困難（上架前可整段移除）
-const IS_APP_BUILD=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());   // App 版：測試模式完全關閉
+const IS_APP_BUILD=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform())||/Electron/.test(navigator.userAgent);   // App 版：測試模式完全關閉
 let TESTMODE=IS_APP_BUILD?0:(()=>{try{return +localStorage.getItem('ember-abyss-test')||0}catch(e){return 0}})();   // 0 關、1 全部解鎖、2 模擬免費版（App 上鎖時的樣子）
 const testLabel=()=>TESTMODE===1?' · TEST':TESTMODE===2?' · TEST FREE':'';
 /* ================= 完整版（買斷） =================
@@ -1737,18 +1737,23 @@ function isFull(){if(TESTMODE===1)return true;if(TESTMODE===2)return false;if(!I
  try{return localStorage.getItem(FULL_KEY)==='1'}catch(e){return false}}
 const clsPaid=id=>!FREE_CLS.includes(id);
 function setFull(){try{localStorage.setItem(FULL_KEY,'1')}catch(e){}}
+if(IS_APP&&!isFull())setTimeout(()=>{const i=window.EmberIAP;if(i&&i.owned)i.owned().then(ok=>{if(ok)setFull()}).catch(()=>{})},1500);   // 重裝後自動恢復：owned() 不跳任何視窗，只查購買紀錄
+// App 內（WKWebView）不支援 <a download>：點「儲存圖片」改開系統分享面板，玩家自己選「儲存影像」
+if(IS_APP)document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest('a[download]');if(!a)return;e.preventDefault();e.stopPropagation();
+ fetch(a.getAttribute('href')).then(r=>r.blob()).then(b=>{const f=new File([b],a.getAttribute('download')||'emberlamp.jpg',{type:b.type||'image/jpeg'});
+  if(navigator.canShare&&navigator.canShare({files:[f]}))return navigator.share({files:[f]});throw new Error('noshare')}).catch(err=>{if(err&&err.name==='AbortError')return;a.textContent=L.ui_gal_nosave})},true);
 function fullModal(back){
- const iap=window.EmberIAP,dis=TESTMODE===2;
+ const iap=window.EmberIAP,dis=TESTMODE===2,NOIAP=IS_APP?L.ui_full_nostore:L.ui_full_noiap;   // App 裡連不上商店時不能說「請在 App 裡購買」
  const FULL_THUMBS=['miko','ferry','shadow','rune','monk','berserk'].filter(id=>GAL[id+'_4']);   // 購買頁：完整版六個職業的畫廊特寫縮圖（燈巫、送燈人放最前面）
  openModal(`<h2>${L.ui_full_title}</h2><p>${L.ui_full_pitch}</p>${FULL_THUMBS.length?`<div class="fthumbs">${FULL_THUMBS.map(id=>`<figure><img alt="" src="${galThumb(id+'_4')}"><figcaption>${clsById(id).n}</figcaption></figure>`).join('')}</div>`:''}<ul class="fulll">${L.ui_full_list}</ul>
   <div class="stack" style="margin-top:14px"><button class="btn hot wide" id="fBuy" type="button">${L.ui_full_buy}<span id="fPrice"></span></button>
   <div class="row" style="justify-content:space-between"><button class="btn small" id="fRestore" type="button">${L.ui_full_restore}</button><button class="btn small" id="fBack" type="button">${L.ui_full_later}</button></div></div>
-  <p class="tiny" id="fNote" style="margin-top:10px">${iap||dis?'':L.ui_full_noiap}</p>`,false,()=>{
+  <p class="tiny" id="fNote" style="margin-top:10px">${iap||dis||IS_APP?'':L.ui_full_noiap}</p>`,false,()=>{
   $('#fBack').onclick=back;
   if(iap&&iap.price)iap.price().then(p=>{if(p)$('#fPrice').textContent=' · '+p}).catch(()=>{});
   const done=ok=>{if(ok){setFull();if(TESTMODE===2){TESTMODE=0;try{localStorage.setItem('ember-abyss-test','0')}catch(e){}}sfx('level');openModal(`<h2>${L.ui_full_thanks}</h2><p>${L.ui_full_thanks_d}</p><div class="row"><button class="btn hot" id="fOk" type="button">${L.ui_dz_ok}</button></div>`,false,()=>{$('#fOk').onclick=back})}else $('#fNote').textContent=L.ui_full_fail};
-  $('#fBuy').onclick=()=>{if(dis){done(true);return}if(!iap){$('#fNote').textContent=L.ui_full_noiap;return}$('#fNote').textContent=L.ui_full_wait;iap.buy().then(done).catch(()=>done(false))};
-  $('#fRestore').onclick=()=>{if(dis){done(true);return}if(!iap){$('#fNote').textContent=L.ui_full_noiap;return}$('#fNote').textContent=L.ui_full_wait;iap.restore().then(ok=>ok?done(true):($('#fNote').textContent=L.ui_full_none)).catch(()=>done(false))}})}
+  $('#fBuy').onclick=()=>{if(dis){done(true);return}if(!iap){$('#fNote').textContent=NOIAP;return}$('#fNote').textContent=L.ui_full_wait;iap.buy().then(done).catch(()=>done(false))};
+  $('#fRestore').onclick=()=>{if(dis){done(true);return}if(!iap){$('#fNote').textContent=NOIAP;return}$('#fNote').textContent=L.ui_full_wait;iap.restore().then(ok=>ok?done(true):($('#fNote').textContent=L.ui_full_none)).catch(()=>done(false))}})}
 function aboutModal(back){
  openModal(`<h2>${L.ui_about}</h2><p class="dim" id="abVer" style="margin-top:-4px">${L.app_name} · ${L.ui_version} ${VERSION}${testLabel()}</p>
  ${CREDIT?`<h3>${L.ui_made}</h3><p>${CREDIT}</p>`:''}
@@ -1765,9 +1770,9 @@ function bindTestTap(redraw){const v=$('#abVer');if(!v||IS_APP_BUILD)return;let 
 function settingsModal(back){
  const row=(id,label,val,on)=>`<button class="tog" id="${id}" type="button"${on===undefined?'':` aria-pressed="${on}"`}><span>${label}</span><i>${val}</i></button>`,oo=b=>b?L["g_開"]:L["g_關"];
  openModal(`<h2>${L.ui_settings}</h2><h3>${L.ui_set_sound}</h3><div class="${canVib()?'trio':'pair'}">${row('sMus',L["t0511"],oo(MUS.on),MUS.on)}${row('sSnd',L["t0512"],oo(soundOn),soundOn)}${canVib()?row('sVib',L.ui_vib,oo(vibOn),vibOn):''}</div>
-  <h3>${L.ui_set_view}</h3><div class="setl">${SPR?row('sStyle',L.ui_style,STYLE==='pixel'?L.ui_style_pixel:L.ui_style_glyph):''}${row('sZoom',L.ui_zoom,Math.round(ZOOM*100)+'%')}${matchMedia('(hover:hover) and (pointer:fine)').matches?'':row('sCtrl',L.ui_ctrl,CTRL==='stick'?L.ui_ctrl_stick:L.ui_ctrl_pad)+row('sLefty',L.ui_lefty,oo(lefty),lefty)}${Object.keys(EVENTS).length?row('sVig',L.ui_ev_toggle,oo(vigOn),vigOn):''}${row('sLang',L.ui_lang,LANG_NAMES[LANG_ID])}<button class="tog" id="sBackup" type="button"><span>${L.ui_bk}</span><i>›</i></button><button class="tog" id="sAbout" type="button"><span>${L.ui_about}</span><i>›</i></button></div>
+  <h3>${L.ui_set_view}</h3><div class="setl">${SPR?row('sStyle',L.ui_style,STYLE==='pixel'?L.ui_style_pixel:L.ui_style_glyph):''}${row('sZoom',L.ui_zoom,Math.round(ZOOM*100)+'%')}${matchMedia('(hover:hover) and (pointer:fine)').matches?'':row('sCtrl',L.ui_ctrl,CTRL==='stick'?L.ui_ctrl_stick:L.ui_ctrl_pad)+row('sLefty',L.ui_lefty,oo(lefty),lefty)}${Object.keys(EVENTS).length?row('sVig',L.ui_ev_toggle,oo(vigOn),vigOn):''}${row('sLang',L.ui_lang,LANG_NAMES[LANG_ID])}${(IS_APP||window.EMBER_WEBLOCK)&&!isFull()?`<button class="tog" id="sFull" type="button"><span>${L.ui_full_restore}</span><i>›</i></button>`:''}<button class="tog" id="sBackup" type="button"><span>${L.ui_bk}</span><i>›</i></button><button class="tog" id="sAbout" type="button"><span>${L.ui_about}</span><i>›</i></button></div>
   <div class="row" style="margin-top:18px"><button class="btn" id="sBack" type="button">${L.ui_back}</button></div>`,!!G,()=>{
-  const again=()=>settingsModal(back);
+  const again=()=>settingsModal(back);{const f=$('#sFull');if(f)f.onclick=()=>fullModal(again)}
   $('#sBack').onclick=back;$('#sAbout').onclick=()=>aboutModal(again);$('#sBackup').onclick=()=>backupModal(again);$('#sLang').onclick=()=>langModal(again);
   $('#sMus').onclick=()=>{toggleMusic();again()};{const v=$('#sVib');if(v)v.onclick=()=>{vibOn=!vibOn;store(VIB_KEY,vibOn);if(vibOn)buzz('hit');again()}}$('#sSnd').onclick=()=>{soundOn=!soundOn;store(SND_KEY,soundOn);if(soundOn)sfx('pick');again()};
   bindStyle('sStyle',again);bindZoom('sZoom',again);
@@ -2088,7 +2093,7 @@ function featTarget(){if(!G||G.over)return null;let best=null;for(const f of G.f
 function doInteract(){if(!canAct())return;auto=null;const m=atkTarget();
  if(m){if(cheb(m.x,m.y,P.x,P.y)===1)tryMove(m.x-P.x,m.y-P.y);else shootAt(m)}else{const f=featTarget();if(f)useFeat(f);else interact()}updateHUD()}
 function doExplore(){if(!canAct())return;
- if(anyVisibleMon()){msg(L["t0589"],'blood');return}
+ if(anyVisibleMon()){msg(L["t0589"],'blood');const now=performance.now();for(const m of G.mons)if(m.hp>0&&!m.asleep&&vis[idx(m.x,m.y)]&&monVisible(m)){m.hitT=now;fxText(m.x,m.y,'!','#ff7a5c')}return}   // 讓擋路的怪閃一下、頭上冒驚嘆號
  auto={kind:'explore'};autoTick()}
 function canPick(it){if(it.cat==='gold'||it.cat==='page'||it.cat==='memo'||it.cat==='lamp'||it.cat==='relic'||it.cat==='heart')return true;if(it.cat==='gem')return P.gems.length<GEM_POUCH;
  if(it.cat==='oil')return P.oil<=70||P.inv.some(q=>q.cat==='oil')||P.inv.length<12;
