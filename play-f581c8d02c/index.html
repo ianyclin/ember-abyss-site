@@ -219,7 +219,7 @@ body.ontitle #app{visibility:hidden}   /* 標題與子畫面的半透明底下�
 #vig .vload{position:absolute;left:50%;top:45%;width:14px;height:14px;margin:-7px;border-radius:50%;background:#ff9a3c;box-shadow:0 0 18px 6px rgba(255,140,50,.6);animation:vload 1s ease-in-out infinite}
 #vig.loaded .vload{display:none}
 @keyframes vload{0%,100%{transform:scale(.6);opacity:.5}50%{transform:scale(1);opacity:1}}
-#vig .vcap small{display:block;margin-top:6px;font-family:var(--f-body);font-size:clamp(13px,3.6vw,18px);color:#f3e6d0;text-shadow:0 1px 3px #000}
+#vig .vcap small{display:block;text-wrap:balance;margin-top:6px;font-family:var(--f-body);font-size:clamp(13px,3.6vw,18px);color:#f3e6d0;text-shadow:0 1px 3px #000}
 #vig .vcap{position:relative;text-align:center;margin-bottom:max(48px,env(safe-area-inset-bottom,0px));padding:10px 26px;font-family:var(--f-display);font-size:clamp(22px,6vw,40px);color:#ffb867;text-shadow:0 0 18px rgba(255,120,40,.7),0 2px 4px #000;background:linear-gradient(90deg,transparent,rgba(0,0,0,.6),transparent)}
 #vig .vhint{position:absolute;left:0;right:0;bottom:max(14px,env(safe-area-inset-bottom,0px));text-align:center;font-size:13px;letter-spacing:.2em;color:#d9c7a8;text-shadow:0 1px 3px #000;animation:vhint 1.6s ease-in-out infinite}
 @keyframes vhint{0%,100%{opacity:.25}50%{opacity:.9}}
@@ -304,7 +304,7 @@ body.ontitle #app{visibility:hidden}   /* 標題與子畫面的半透明底下�
 .choice .ptag{font-size:10px;color:var(--dim);display:inline-block}
 .choice .ptag.act{color:var(--violet)}
 .choice span.kit{display:inline;font-size:12px}
-img,a[download]{-webkit-touch-callout:none;-webkit-user-drag:none}   /* App：長按插圖不跳系統選單（不能繞過「只看一次」，也不會把整個遊戲換成那張圖） */
+.app img,.app a[download]{-webkit-touch-callout:none;-webkit-user-drag:none}   /* App（與上鎖的測試網址，html 加 class app）：長按插圖不跳系統選單（不能繞過「只看一次」，也不會把整個遊戲換成那張圖） */
 .story{border-left:2px solid var(--ember);padding:2px 0 2px 14px;margin:12px 0}
 .story p{margin:0 0 8px;line-height:1.85;color:var(--bone)}
 .story p:last-child{margin-bottom:0}
@@ -400,6 +400,13 @@ body.crit #danger{opacity:1;animation:dangerPulse 1.1s ease-in-out infinite}
 <script src="art/gallery.js"></script>
 <script>
 'use strict';
+/* 本機錯誤記錄：WKWebView 裡的 JS 錯誤不會閃退、也不進當機報告。只留最近 5 筆在本機，「關於」頁有紀錄時才顯示，玩家可複製後寄給我們 */
+const ERR_KEY='ember-abyss-errlog';
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]);
+function errLog(){try{const a=JSON.parse(localStorage.getItem(ERR_KEY)||'[]');return Array.isArray(a)?a:[]}catch(e){return []}}
+function errPush(m,src){try{const a=errLog();a.push({t:new Date().toISOString().slice(0,16).replace('T',' '),m:String(m||'?').slice(0,300),s:String(src||'').slice(0,120),v:typeof VERSION==='undefined'?'?':VERSION});localStorage.setItem(ERR_KEY,JSON.stringify(a.slice(-5)))}catch(e){}}
+addEventListener('error',e=>errPush(e.message,(e.filename||'').split('/').pop()+':'+e.lineno+':'+e.colno));
+addEventListener('unhandledrejection',e=>{const r=e.reason;errPush(r&&r.message||r,r&&r.stack?(String(r.stack).split('\n')[1]||'').trim():'promise')});
 /* ================= 語言 =================
    所有玩家看得到的文字都在 lang/ 資料夾的語言檔裡。L["鍵"] 是固定文字，
    tr("鍵",值0,值1…) 會把語言檔文字裡的 {0}、{1} 換成對應的值。 */
@@ -459,7 +466,8 @@ const SAVE_KEY='ember-abyss-save-v1',REC_KEY='ember-abyss-rec-v1',SND_KEY='ember
 function store(k,v){try{if(k===REC_KEY&&v&&typeof DISC!=='undefined'&&DISC){v.disc=[...new Set([...(v.disc||[]),...DISC])]}if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
 function loadKey(k){try{const s=localStorage.getItem(k);const v=s?JSON.parse(s):null;
  // 紀錄可能只被寫過一部分（圖鑑、工坊、測試加餘燼都會先建紀錄）：缺的數字一律補 0，避免顯示 undefined、算出 NaN
- if(k===REC_KEY&&v&&typeof v==='object')for(const f of ['best','hi','wins','runs'])if(typeof v[f]!=='number'||!isFinite(v[f]))v[f]=0;
+ if(k===REC_KEY&&(v===null||typeof v!=='object'||Array.isArray(v)))return null;   // 紀錄被寫成數字、字串、陣列等非物件：當作沒有紀錄（呼叫端都有預設物件）
+ if(k===REC_KEY)for(const f of ['best','hi','wins','runs'])if(typeof v[f]!=='number'||!isFinite(v[f]))v[f]=0;
  return v}catch(e){return null}}
 const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -542,8 +550,9 @@ const SLEEP_TIP_KEY='ember-abyss-tip-sleep';let sleepTipped=(()=>{try{return !!l
 let noScan=false;   // 教學放狼前先算一次視野：這時還不要觸發提示與圖鑑
 function discScan(){if(!G||!P||noScan)return;
  for(const m of G.mons)if(m.hp>0&&MON[m.k].big&&!m.buzzed&&vis[idx(m.x,m.y)]){m.buzzed=true;buzz('heavy')}
- {const tm=!G.tutShown&&G.mons.find(m=>m.tut&&m.asleep&&m.hp>0&&vis[idx(m.x,m.y)]);if(tm){G.tutShown=1;tm.autoSeen=1;auto=null;sleepTipped=true;{const r=loadKey(REC_KEY)||{};if(!r.tut){r.tut=1;store(REC_KEY,r)}}try{localStorage.setItem(SLEEP_TIP_KEY,'1')}catch(e){}
-  const show=()=>{if(!G||G.over||!tm.asleep||tm.hp<=0)return;if(modalOpen||VIG){setTimeout(show,400);return}openModal(tr('ui_tut_sleep',MON[tm.k].n)+`<div class="row" style="margin-top:14px"><button class="btn hot" id="pgOk" type="button">${L.ui_tut_ok}</button></div>`,false,()=>{$('#pgOk').onclick=()=>{G.tutReady=1;closeModal(true);save()}})};setTimeout(show,350)}}
+ {const tm=!G.tutShown&&G.mons.find(m=>m.tut&&m.asleep&&m.hp>0&&vis[idx(m.x,m.y)]);if(tm){G.tutShown=1;tm.autoSeen=1;auto=null;sleepTipped=true;
+  const show=()=>{if(!G||G.over||!tm.asleep||tm.hp<=0)return;if(modalOpen||VIG){setTimeout(show,400);return}{const r=loadKey(REC_KEY)||{};if(!r.tut){r.tut=1;store(REC_KEY,r)}}try{localStorage.setItem(SLEEP_TIP_KEY,'1')}catch(e){}   /* 提示真的跳出來才記「教過」；沒跳出（狼先被打倒）下一局再教 */
+  openModal(tr('ui_tut_sleep',MON[tm.k].n)+`<div class="row" style="margin-top:14px"><button class="btn hot" id="pgOk" type="button">${L.ui_tut_ok}</button></div>`,false,()=>{$('#pgOk').onclick=()=>{G.tutReady=1;closeModal(true);save()}})};setTimeout(show,350)}}
  if(!sleepTipped&&G.mons.some(m=>m.hp>0&&m.asleep&&monVisible(m))){sleepTipped=true;try{localStorage.setItem(SLEEP_TIP_KEY,'1')}catch(e){}msg(L.ui_tip_sleep,'dim')}   // 第一次看到睡著的怪物（這台裝置只提示一次）   // 震動：吞光者、燼王第一次進入視野
  for(const m of G.mons)if(m.hp>0&&!MON[m.k].big&&vis[idx(m.x,m.y)]&&(!MON[m.k].shade||cheb(m.x,m.y,P.x,P.y)<=2||inCandle(m)))discover('m:'+m.k);
  for(const it of G.items)if(vis[idx(it.x,it.y)]&&['oil','potion','scroll','weapon','armor','gold','page','gem','lamp'].includes(it.cat))discover('i:'+it.cat);
@@ -685,9 +694,9 @@ const occupied=(x,y)=>!passable(x,y)||!!monAt(x,y)||(P.x===x&&P.y===y)||!!featAt
 const MC={bone:'#efe3cc',dim:'#9a8b77',blood:'#ee6a5c',ember:'#ffab5c',oil:'#e9b949',jade:'#7ed3b6',violet:'#c2a6f0'};
 function msg(t,c='bone'){const last=G.log[G.log.length-1];if(last&&last[0]===t){last[2]=(last[2]||1)+1;renderLog(true);return}G.log.push([t,c]);if(G.log.length>80)G.log.shift();renderLog(true)}
 function renderLog(fresh){const el=$('#log');if(!G){el.innerHTML='';clearTimeout(renderLog.t);renderLog.t=null;return}const lv1=G.log.slice(-4);   // 只有真的有新訊息（或還沒排過）才展開、重新倒數；走一步沒有新訊息時維持原狀
- // 收成一行的時間跟字數走（中日文每字 0.12 秒、拉丁字母每字 0.05 秒，4.5～15 秒）；有視窗或插圖蓋著時不倒數
+ // 收成一行的時間跟字數走（中日文每字 0.12 秒、拉丁字母每字 0.05 秒，4.5～15 秒）；有視窗或插圖蓋著時暫停倒數（每 0.25 秒看一次，蓋著的時間不扣）
  let ms=3000;for(const m of lv1)for(const ch of String(m[0]).replace(/<[^>]*>/g,''))ms+=ch.charCodeAt(0)>0x2e80?120:50;ms=Math.min(15000,Math.max(4500,ms));
- if(fresh||!renderLog.t&&!el.classList.contains('quiet')){el.classList.remove('quiet');clearTimeout(renderLog.t);const arm=t=>{renderLog.t=setTimeout(()=>{if(modalOpen||VIG){arm(ms);return}renderLog.t=null;el.classList.add('quiet')},t)};arm(ms)}el.innerHTML=lv1.map((m,i)=>`<p style="color:${MC[m[1]]||m[1]};opacity:${0.45+0.55*(i+1)/lv1.length}">${m[0]}${m[2]>1?' ×'+m[2]:''}</p>`).join('')}
+ if(fresh||!renderLog.t&&!el.classList.contains('quiet')){el.classList.remove('quiet');clearTimeout(renderLog.t);let left=ms;const tick=()=>{renderLog.t=setTimeout(()=>{if(!(modalOpen||VIG))left-=250;if(left>0){tick();return}renderLog.t=null;el.classList.add('quiet')},250)};tick()}el.innerHTML=lv1.map((m,i)=>`<p style="color:${MC[m[1]]||m[1]};opacity:${0.45+0.55*(i+1)/lv1.length}">${m[0]}${m[2]>1?' ×'+m[2]:''}</p>`).join('')}
 function fxText(x,y,text,color){if(FX.length>400)return;FX.push({k:'t',x:x+.5,y:y+.2,text,color,life:1,max:1})}
 function fxBurst(x,y,color,n=10,spd=3){if(FX.length>400)return;for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2,s=Math.random()*spd+.5;FX.push({k:'p',x:x+.5,y:y+.5,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:.4+Math.random()*.4,max:.8,color,size:Math.random()*.08+.04})}}
 // 技能特效：擴散光環、光束、閃光、大字
@@ -722,7 +731,7 @@ const canVib=()=>!!HAPT()||(typeof navigator!=='undefined'&&typeof navigator.vib
 function buzz(k){if(!vibOn)return;try{const H=HAPT();
  if(H){if(k==='level'||k==='win')H.notification({type:'SUCCESS'});else if(k==='die')H.notification({type:'ERROR'});else H.impact({style:k==='heavy'?'HEAVY':k==='hit'?'MEDIUM':'LIGHT'});return}
  if(navigator.vibrate)navigator.vibrate({wall:12,hit:30,heavy:60,level:[30,60,30],win:[40,60,40,60,80],die:[80,60,160]}[k]||20)}catch(e){}}
-function sfx(n){if(!soundOn)return;try{ensureAC();
+function sfx(n){if(!soundOn||document.hidden)return;try{ensureAC();   /* 背景中（自動探索還在走）不播，免得把剛暫停的音訊叫回來 */
  // 有錄音的先用錄音
  const S={hit:['hit',.5],crit:['crit',.6],hurt:['hurt',.55],miss:['miss',.45],pick:['pick',.45],gold:['gold',.4],magic:['magic',.35],swing:['swing',.5],shade:['shade',.5],equip:['equip',.45],page:['page',.5],potion:['potion',.5],door:['door',.4]};
  if(S[n]&&samp(S[n][0],S[n][1]))return;
@@ -887,7 +896,7 @@ function genFloorCore(){
   let bx=lv2.cx,by=lv2.cy;if(m[idx(bx,by)]===T.STAIRS)bx=bx>lv2.x?bx-1:bx+1;
   const b=makeMon('devour',bx,by,d);G.mons.push(b);G.seal={kind:'mid',done:false};computeDist()}
  else if(d>=2&&d<=9&&chance(.45)){
-  if(chance(.55)){let n=0;for(let i=0;i<3;i++){const s=spot(6);if(s){G.feats.push({kind:'brazier',x:s[0],y:s[1],lit:false});n++}}if(n){G.seal={kind:'brazier',need:n,lit:0};const so=spot(4);if(so)G.items.push({cat:'oil',n:1,x:so[0],y:so[1]})}}
+  if(chance(.55)){let n=0;for(let i=0;i<3;i++){let s=null;for(let t=0;t<30&&!s;t++){const q=spot(6);if(q&&!G.feats.some(f=>f.kind==='merchant'&&cheb(f.x,f.y,q[0],q[1])<=2))s=q}if(s){G.feats.push({kind:'brazier',x:s[0],y:s[1],lit:false});n++}}if(n){G.seal={kind:'brazier',need:n,lit:0};const so=spot(4);if(so)G.items.push({cat:'oil',n:1,x:so[0],y:so[1]})}}
   else{const s=spot(8);if(s){const g=makeMon('guard',s[0],s[1],d);g.hp=g.mhp=Math.round((20+d*6)*dif().hp);g.atk=Math.round((3+d)*dif().atk)+(G.omen==='blood'?1:0);g.def=1+Math.floor(d/3);g.asleep=true;G.mons.push(g);G.seal={kind:'guard',done:false}}}}
  // 苔光：淺層多、深層少，第十層沒有
  if(d<10){const ng=d<=3?ri(4,6):d<=6?ri(2,3):ri(0,1);for(let i=0;i<ng;i++){const s=spot(3,rooms);if(s)G.glow.push({x:s[0],y:s[1]})}}
@@ -1479,7 +1488,7 @@ function deathStory(cause){const d=G.depth,r=loadKey(REC_KEY)||{},first=(r.runs|
  const f='';
  return `<div class="story"><p>${a}</p><p>${b}</p>${c?`<p>${c}</p>`:''}</div>${f}`}
 function dieFinal(cause){const e=finishRun(),{s,isHi}=e;
- const show=()=>openModal(tr("t0436",clsOf().n,dif().n,NUM[G.depth],FLOORS[G.depth],cause,deathStory(cause),statsHTML(),emberLine(e)+(e.newCls?(!isFull()&&clsPaid(e.newCls)?`<p class="unlock">${tr("ui_full_next",clsById(e.newCls).n)}</p><div class="row"><button class="btn small" id="vFull" type="button">${L.ui_full_see}</button></div>`:`<p class="unlock">${tr("ui_cls_new",clsById(e.newCls).n)}</p>`):'')+(e.newAsc?`<p class="unlock">${tr("ui_asc_new",e.newAsc)}</p>`:''),isHi?L["t0437"]:'',G.daily?L["t0438"]+G.daily:''),false,()=>{const d=!!G.daily,c=G.cls;$('#mNew').onclick=()=>newGame(d,c,G.diff);$('#mNew').textContent=L["t0439"];$('#mCls').onclick=()=>classModal(d);$('#mTitle').onclick=showTitle;{const vf=$('#vFull');if(vf)vf.onclick=()=>fullModal(show)}resultBtns()});show()}
+ const show=()=>{if(!G||!G.over){showTitle();return}openModal(tr("t0436",clsOf().n,dif().n,NUM[G.depth],FLOORS[G.depth],cause,deathStory(cause),statsHTML(),emberLine(e)+(e.newCls?(!isFull()&&clsPaid(e.newCls)?`<p class="unlock">${tr("ui_full_next",clsById(e.newCls).n)}</p><div class="row"><button class="btn small" id="vFull" type="button">${L.ui_full_see}</button></div>`:`<p class="unlock">${tr("ui_cls_new",clsById(e.newCls).n)}</p>`):'')+(e.newAsc?`<p class="unlock">${tr("ui_asc_new",e.newAsc)}</p>`:''),isHi?L["t0437"]:'',G.daily?L["t0438"]+G.daily:''),false,()=>{const d=!!G.daily,c=G.cls;$('#mNew').onclick=()=>newGame(d,c,G.diff);$('#mNew').textContent=L["t0439"];$('#mCls').onclick=()=>classModal(d);$('#mTitle').onclick=showTitle;{const vf=$('#vFull');if(vf)vf.onclick=()=>fullModal(show)}resultBtns()})};show()}
 // 結算畫面共用：按鈕列固定在視窗底部；餘燼買得起工坊強化時多一顆「去工坊」，買得起下一區燈城時多一顆「去點亮燈城」
 function resultBtns(){const row=$('#mTitle').parentNode;row.classList.add('stickyb');const r=loadKey(REC_KEY)||{},up=r.up||{},em=r.embers||0;
  const add=(t,f)=>{const b=document.createElement('button');b.className='btn hot';b.type='button';b.textContent=t;b.onclick=f;row.querySelectorAll('.hot').forEach(x=>x.classList.remove('hot'));row.prepend(b)};
@@ -1493,14 +1502,14 @@ function lampEnding(){const carried=P.lamps;if(!carried.length&&!G.dzUp)return '
  if(G.dzUp)h+=`<p>${L.ui_dz_up}</p>`;else if(carried.includes('dongzhi'))h+=`<p>${L.ui_dz_wait}</p>`;
  return `<div class="story">${h}</div>`}
 function victory(){G.won=true;G.over=true;sfx('level');buzz('win');const g0=galCount(loadKey(REC_KEY)||{}),LE=lampEnding(),e=finishRun(),{s,isHi}=e,gNew=galCount(loadKey(REC_KEY)||{})-g0;
- const show=()=>openModal(tr("t0440",G.diff==='hard'?L["t0441"]+(asc()?' '+tr("ui_asc_lv",asc()):''):'',clsOf().n,(L['cs_'+G.cls+'_end']?`<div class="story"><p>${L['cs_'+G.cls+'_end']}</p></div>`:'')+(L.ui_end_lamp||'')+(G.diff==='hard'?tr("t0442",e.firstHard?tr("t0443",clsOf().n,e.hardCount):''):'')+LE,statsHTML(),emberLine(e)+(e.newCls?(!isFull()&&clsPaid(e.newCls)?`<p class="unlock">${tr("ui_full_next",clsById(e.newCls).n)}</p><div class="row"><button class="btn small" id="vFull" type="button">${L.ui_full_see}</button></div>`:`<p class="unlock">${tr("ui_cls_new",clsById(e.newCls).n)}</p>`):'')+(e.newAsc?`<p class="unlock">${tr("ui_asc_new",e.newAsc)}</p>`:'')+(gNew>0?`<p class="unlock">${tr("ui_gal_new",gNew)}</p>`:'')+(e.newSeason?`<p class="unlock">${tr('ui_season_new',clsOf().n,L['ui_season_'+e.newSeason])}</p>`:''),isHi?L["t0437"]:'',G.daily?L["t0438"]+G.daily:''),false,()=>{$('#mNew').onclick=()=>classModal(false);$('#mTitle').onclick=showTitle;{const vf=$('#vFull');if(vf)vf.onclick=()=>fullModal(show)}resultBtns()});const home=()=>LE?vignette('lamphome',L.ui_ev_lamphome,show):show();   // 天亮 → 帶燈回家 → 結算；第一次通關慢速
+ const show=()=>{if(!G||!G.over){showTitle();return}openModal(tr("t0440",G.diff==='hard'?L["t0441"]+(asc()?' '+tr("ui_asc_lv",asc()):''):'',clsOf().n,(L['cs_'+G.cls+'_end']?`<div class="story"><p>${L['cs_'+G.cls+'_end']}</p></div>`:'')+(L.ui_end_lamp||'')+(G.diff==='hard'?tr("t0442",e.firstHard?tr("t0443",clsOf().n,e.hardCount):''):'')+LE,statsHTML(),emberLine(e)+(e.newCls?(!isFull()&&clsPaid(e.newCls)?`<p class="unlock">${tr("ui_full_next",clsById(e.newCls).n)}</p><div class="row"><button class="btn small" id="vFull" type="button">${L.ui_full_see}</button></div>`:`<p class="unlock">${tr("ui_cls_new",clsById(e.newCls).n)}</p>`):'')+(e.newAsc?`<p class="unlock">${tr("ui_asc_new",e.newAsc)}</p>`:'')+(gNew>0?`<p class="unlock">${tr("ui_gal_new",gNew)}</p>`:'')+(e.newSeason?`<p class="unlock">${tr('ui_season_new',clsOf().n,L['ui_season_'+e.newSeason])}</p>`:''),isHi?L["t0437"]:'',G.daily?L["t0438"]+G.daily:''),false,()=>{$('#mNew').onclick=()=>classModal(false);$('#mTitle').onclick=showTitle;{const vf=$('#vFull');if(vf)vf.onclick=()=>fullModal(show)}resultBtns()})};const home=()=>LE?vignette('lamphome',L.ui_ev_lamphome,show):show();   // 天亮 → 帶燈回家 → 結算；第一次通關慢速
  if(e.firstWin)VDUR.dawn=9000;else delete VDUR.dawn;vignette('dawn',L.ui_ev_dawn,home)}
 
 /* ================= 新遊戲／存檔 ================= */
 // 第一局的教學：往樓梯的路上放一隻睡得很沉的灰狼。遮燈靠近牠不會醒，偷襲一刀重創；開著燈走到兩格內牠就醒（照樣打得贏，只是比較痛）
 function tutSetup(){const seen0=G.seen.slice();G.seen.fill(1);const path=bfsPath((x,y)=>tile(x,y)===T.STAIRS,false);for(let i=0;i<seen0.length;i++)G.seen[i]=seen0[i];   // 找路時暫時當作整層都看過
  if(!path||path.length<7)return false;
- noScan=true;fov();noScan=false;let pi=-1;for(let i=5;i<=Math.min(path.length-3,14);i++){const[x,y]=path[i];if(!vis[idx(x,y)]&&cheb(P.x,P.y,x,y)>=4){pi=i;break}}   // 靠近一點，但開局站的地方看不到牠
+ noScan=true;fov();noScan=false;let pi=-1;for(let i=5;i<=Math.min(path.length-3,14);i++){const[x,y]=path[i];if(!vis[idx(x,y)]&&cheb(P.x,P.y,x,y)>=4&&!occupied(x,y)&&!featAt(x,y)&&!trapAt(x,y)){pi=i;break}}   // 靠近一點，但開局站的地方看不到牠；有怪、設施、陷阱的格子跳過，往後找
  if(pi<0)pi=Math.min(path.length-3,8);
  const[x,y]=path[pi];if(occupied(x,y)||featAt(x,y)||trapAt(x,y))return false;
  G.mons=G.mons.filter(m=>cheb(m.x,m.y,x,y)>5&&cheb(m.x,m.y,P.x,P.y)>6);
@@ -1530,8 +1539,8 @@ function newGame(daily,clsId,diff){document.body.classList.remove('ontitle');
  // 每個職業第一次下井（每日挑戰除外）：用視窗讀一次這個人的開場故事；第一局排在「燈井」之後當第二頁
  const ci=!daily&&L['cs_'+cls.id+'_in']&&!(r.clsIntro||[]).includes(cls.id);
  const clsIntro=()=>{const r2=loadKey(REC_KEY)||{};r2.clsIntro=r2.clsIntro||[];if(!r2.clsIntro.includes(cls.id)){r2.clsIntro.push(cls.id);store(REC_KEY,r2)}
-  openModal(`<h2 style="color:${cls.c}">${cls.n}</h2><div class="story"><p>${L['cs_'+cls.id+'_in']}</p></div><div class="row"><button class="btn hot" id="ciOk" type="button">${L.ui_cls_go}</button></div>`,true,()=>{$('#ciOk').onclick=()=>closeModal()})};
- if(r.runs===1)openModal(tr("t0449",INTRO),true,()=>{$('#inOk').onclick=()=>{if(ci)clsIntro();else closeModal()}});else if(ci)clsIntro()}
+  openModal(`<h2 style="color:${cls.c}">${cls.n}</h2><div class="story"><p>${L['cs_'+cls.id+'_in']}</p></div><div class="row"><button class="btn hot" id="ciOk" type="button">${L.ui_cls_go}</button></div>`,true,()=>{$('#ciOk').onclick=()=>closeModal()},true)};
+ if(r.runs===1)openModal(tr("t0449",INTRO),!ci,()=>{$('#inOk').onclick=()=>{if(ci)clsIntro();else closeModal()}});else if(ci)clsIntro()}   // 有職業開場時「燈井」不能點背景／Esc 關掉，要按按鈕才接到第二頁
 function save(){if(!G||G.over)return;G.rs=RS;store(SAVE_KEY,G)}
 function validSave(g){return !!(g&&g.P&&typeof g.P.hp==='number'&&typeof g.P.x==='number'&&Array.isArray(g.mons)&&Array.isArray(g.feats)&&Array.isArray(g.items)&&Array.isArray(g.log)&&g.map&&g.depth>=1&&g.cls)}   // 缺欄位的存檔（例如改版後格式不同）當作沒有存檔
 function resume(g){document.body.classList.remove('ontitle');G=g;P=G.P;ensureP();relocalize();
@@ -1568,9 +1577,9 @@ function stickBack(){const sh=$('#sheet'),b=sh.querySelector('#hBack,#jBack,#gBa
  b.classList.remove('hot','small','wide');let row=b.closest('.row');
  if(!(row&&row.parentNode===sh&&!row.nextElementSibling)){row=document.createElement('div');row.className='row';sh.appendChild(row)}
  row.insertBefore(b,row.firstChild);row.style.justifyContent='space-between';row.classList.add('stickyb')}
-// 防誤觸：視窗「從關到開」之後的一小段時間不接受真人的點擊（點怪物打死而升級時，同一下或連點會落在剛跳出的選項上）；已經開著的視窗換內容不算
+// 防誤觸：視窗「從關到開」之後的一小段時間不接受真人的點擊（點怪物打死而升級時，同一下或連點會落在剛跳出的選項上）；已經開著的視窗換內容不算（工坊連按），但換成另一個視窗時呼叫端傳 rearm=true 重新計時（確認視窗、職業開場、購買頁、最後一句話的回應頁）
 let modalT0=0,modalGuard=0;
-function openModal(html,closable=true,bind){document.body.classList.remove('tmenu');if(!modalOpen){modalT0=performance.now();modalGuard=closable?380:650}$('#sheet').innerHTML=html;$('#sheet').scrollTop=0;stickBack();$('#modal').hidden=false;modalOpen=true;modalClosable=closable;auto=null;if(bind)bind();const f=$('#sheet').querySelector('button');if(f&&matchMedia('(hover:hover)').matches)f.focus()}
+function openModal(html,closable=true,bind,rearm){document.body.classList.remove('tmenu');if(!modalOpen||rearm){modalT0=performance.now();modalGuard=closable?380:650}$('#sheet').innerHTML=html;$('#sheet').scrollTop=0;stickBack();$('#modal').hidden=false;modalOpen=true;modalClosable=closable;auto=null;if(bind)bind();const f=$('#sheet').querySelector('button');if(f&&matchMedia('(hover:hover)').matches)f.focus()}
 function closeModal(force){if(!modalOpen)return;if(!modalClosable&&!force)return;$('#modal').hidden=true;modalOpen=false}
 $('#modal').addEventListener('click',e=>{if(e.target.id==='modal')closeModal()});
 /* ================= 點亮燈城（工坊的第二頁） =================
@@ -1589,7 +1598,7 @@ function cityModal(){const r=loadKey(REC_KEY)||{};const lit=r.city||[],em=r.embe
   ${cityDone(r)?`<p class="unlock">${L.ui_city_all}</p>`:''}<div class="row"><button class="btn" id="wBack" type="button">${L.ui_back}</button></div>`,false,()=>{
   $('#wBack').onclick=showTitle;$('#wUp').onclick=workshopModal;
   const pic=(id,fresh,then)=>{const c=CITY.find(q=>q.id===id),k=cityPic(c);const open=galOpen(c.cls||'city');if(!GAL[k]||(!fresh&&!open)){then();return}   // 免費版：點亮的那一刻看得到插圖，之後重看要完整版（收在畫廊）
-   openModal(`<div class="galview"><img alt="" src="${GAL[k]}"></div><p style="margin:10px 0 0"><b style="color:var(--ember)">${L['city_'+id]}</b>${c.cls?`　<span class="muted">${clsById(c.cls).n}</span>`:''}</p><div class="row" style="margin-top:12px;justify-content:space-between">${open?`<a class="btn small" href="${GAL[k]}" download="emberlamp-${k}.jpg">${L.ui_gal_save}</a>`:`<button class="btn small" id="cpSave" type="button">${L.ui_gal_save}<small class="fbadge">${L.ui_full_tag}</small></button>`}<button class="btn hot" id="cpNext" type="button">${L.ui_city_more}</button></div>`,false,()=>{$('#cpNext').onclick=then;const sv=$('#cpSave');if(sv)sv.onclick=()=>fullModal(()=>pic(id,true,then))})};   // 免費版：儲存鎖起來，按了到完整版說明，回來還是這張圖
+   openModal(`<div class="galview"><img alt="" src="${GAL[k]}"></div><p style="margin:10px 0 0"><b style="color:var(--ember)">${L['city_'+id]}</b>${c.cls?`　<span class="muted">${clsById(c.cls).n}</span>`:''}</p><div class="row" style="margin-top:12px;justify-content:space-between">${open?`<a class="btn small" href="${GAL[k]}" download="emberlamp-${k}.jpg">${L.ui_gal_save}</a>`:`<button class="btn small" id="cpSave" type="button">${L.ui_gal_save}<small class="fbadge">${L.ui_full_tag}</small></button>`}<button class="btn hot" id="cpNext" type="button">${L.ui_city_more}</button></div>`,false,()=>{$('#cpNext').onclick=then;preShare($('#sheet a[download]'));const sv=$('#cpSave');if(sv)sv.onclick=()=>fullModal(()=>pic(id,true,then))})};   // 免費版：儲存鎖起來，按了到完整版說明，回來還是這張圖
   const story=(id,fresh)=>openModal(`<h2>${L['city_'+id]}</h2>${cityScene(lit,fresh?id:null)}<p>${L['city_'+id+'_s']}</p>${id==='square'?`<p class="muted">${L.ui_city_all}</p>`:''}<div class="row"><button class="btn" id="pgOk" type="button">${L.ui_back}</button></div>`,false,()=>{$('#pgOk').onclick=cityModal});
   $('#sheet').querySelectorAll('[data-cs]').forEach(b=>b.onclick=()=>pic(b.dataset.cs,false,()=>story(b.dataset.cs)));
   $('#sheet').querySelectorAll('[data-cl]').forEach(b=>b.onclick=()=>{const c=CITY.find(q=>q.id===b.dataset.cl),r2=loadKey(REC_KEY)||{};if((r2.embers||0)<c.cost)return;r2.embers-=c.cost;r2.city=[...(r2.city||[]),c.id];store(REC_KEY,r2);lit.push(c.id);sfx('level');if(GAL[cityPic(c)]){openModal(`<h2>${L['city_'+c.id]}</h2>${cityScene(lit,c.id)}`,false);const all=lit.length>=CITY.length&&vigOn&&EVENTS.lampcity_lit;   // 全部點亮：全畫面從最左慢慢帶到最右，接著大合照
@@ -1642,7 +1651,7 @@ const GALSEEN_KEY='ember-abyss-galseen';
 function galSeen(k,set){let a=[];try{a=JSON.parse(localStorage.getItem(GALSEEN_KEY)||'[]')}catch(e){}if(!set)return a.includes(k);if(!a.includes(k)){a.push(k);try{localStorage.setItem(GALSEEN_KEY,JSON.stringify(a))}catch(e){}}}
 function galIntro(k,cap,done){const el=document.createElement('div');el.id='vig';el.style.zIndex=60;
  el.innerHTML=`<div class="vload"></div><img alt="" src="${GAL[k]}"><img class="vbg" alt="" src="${GAL[k]}"><div class="vcap">${cap}</div><div class="vhint">${L.ui_ev_continue}</div><a class="btn small vsave" href="${GAL[k]}" download="emberlamp-${k}.jpg">${L.ui_gal_save}</a>`;document.body.appendChild(el);
- const sv=el.querySelector('.vsave');sv.addEventListener('pointerdown',e=>e.stopPropagation());   // 拉到全貌後才出現；按它只存圖，不關畫面
+ const sv=el.querySelector('.vsave');preShare(sv);sv.addEventListener('pointerdown',e=>e.stopPropagation());   // 拉到全貌後才出現；按它只存圖，不關畫面
  const img=el.querySelector('img'),ok=()=>{vcam(img,k);el.querySelectorAll('img').forEach(i=>i.classList.add('ready'));el.classList.add('loaded');const st=el.querySelector('.vstage'),an=st&&st.getAnimations()[0];if(an)an.finished.then(()=>el.classList.add('done'),()=>{});else el.classList.add('done')};
  if(img.decode)Promise.race([img.decode(),new Promise((r,j)=>setTimeout(j,4000))]).then(ok,ok);else img.onload=ok;
  requestAnimationFrame(()=>el.classList.add('on'));
@@ -1653,10 +1662,10 @@ function galIntro(k,cap,done){const el=document.createElement('div');el.id='vig'
 function galView(k,back){const[id,t]=k.split('_'),c=id==='city'?{n:L.ui_gal_cityall,c:'var(--ember)'}:clsById(id);const tn=/^s\d$/.test(t)?L['ui_season_'+t[1]]:L['ui_gal_t'+t]||'';
  if(!galSeen(k)){galSeen(k,1);return galIntro(k,`${c.n}<small>${tn}</small>`,()=>galView(k,back))}
  openModal(`<div class="galview"><img alt="" src="${GAL[k]}"></div><p style="margin:10px 0 0"><b style="color:${c.c}">${c.n}</b>　<span class="muted">${tn}</span></p>
-  <div class="row" style="margin-top:12px;justify-content:space-between"><a class="btn small" id="gSave" href="${GAL[k]}" download="emberlamp-${k}.jpg">${L.ui_gal_save}</a><button class="btn" id="gvBack" type="button">${L.ui_back}</button></div>`,!!G,()=>{$('#gvBack').onclick=back})}
+  <div class="row" style="margin-top:12px;justify-content:space-between"><a class="btn small" id="gSave" href="${GAL[k]}" download="emberlamp-${k}.jpg">${L.ui_gal_save}</a><button class="btn" id="gvBack" type="button">${L.ui_back}</button></div>`,!!G,()=>{$('#gvBack').onclick=back;preShare($('#gSave'))})}
 function journalModal(back){const r=loadKey(REC_KEY)||{};const got=r.pages||[];const lh=r.lampsHome||[],lf=[...new Set([...(r.lampsFound||[]),...lh])];
  openModal(tr("t0473",INTRO,got.length,PAGES.slice(1).map((t,i)=>got.includes(i+1)?tr("t0474",NUM[i+1],t):tr("t0475",NUM[i+1],NUM[i+1])).join('')),!!G,()=>{$('#jBack').onclick=back;$('#jBack').parentNode.classList.add('stickyb');   // 返回鈕固定在視窗底部
-  const mem=r.memos||{},ids=CLASS_ORDER.filter(id=>(mem[id]||[]).length);   // 還沒找到記憶的職業整個不列；一個都沒有就連標題也不出現
+  const mem=r.memos||{},ids=CLASS_ORDER.filter(id=>(mem[id]||[]).length||(r.clsIntro||[]).includes(id));   // 還沒找到記憶、也沒看過開場的職業整個不列；一個都沒有就連標題也不出現
   if(lf.length)$('#jBack').parentNode.insertAdjacentHTML('beforebegin',`<h3>${tr("ui_lamp_journal",lf.length,LAMPS.length)}</h3><div class="stack">${LAMPS.filter(k=>lf.includes(k)).map(k=>`<p><b style="color:#c9a46a">${L['lamp_'+k+'_n']}</b>　<span class="muted" style="font-size:12px">${lh.includes(k)?L.ui_lamp_home:L.ui_lamp_below}</span><br>${L['lamp_'+k+'_t']}</p>`).join('')}</div>`);
   if(ids.length)$('#jBack').parentNode.insertAdjacentHTML('beforebegin',`<h3>${L.ui_memo_journal}</h3><div class="stack">${ids.map(id=>{const c=clsById(id),got=mem[id]||[];
    return `<p><b style="color:${c.c}">${c.n}</b></p>`+(L['cs_'+id+'_in']?`<p class="muted">${L['cs_'+id+'_in']}</p>`:'')+[1,2,3].filter(i=>got.includes(i)).map(i=>`<p><b style="color:var(--ember)">${L['cs_'+id+'_o'+i]}　</b>${L['cs_'+id+'_m'+i]}</p>`).join('')}).join('')}</div>`)})}
@@ -1685,7 +1694,7 @@ function classModal(daily){
    if(imgs.length)classModal.walkT=setInterval(()=>{if(!imgs[0][0].isConnected){clearInterval(classModal.walkT);return}fi=(fi+1)%4;for(const[im,f]of imgs)im.src=f[fi%f.length]},170)}
   $('#sheet').querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{if(!canPlay(b.dataset.c))return;const c=b.dataset.c,go=()=>newGame(daily,c,diff);
    // 有進行中的存檔（一般局和每日挑戰共用一格）：先問一次，避免邊捲邊看時誤點就蓋掉
-   const sv=loadKey(SAVE_KEY);if(sv&&validSave(sv)&&(!sv.over||sv.dying)){openModal(tr('ui_ow_q',(clsById(sv.cls)||CLASSES[0]).n,NUM[sv.depth])+`<div class="row"><button class="btn hot" id="owGo" type="button">${L.ui_ow_go}</button><button class="btn" id="owBack" type="button">${L.ui_back}</button></div>`,false,()=>{$('#owGo').onclick=go;$('#owBack').onclick=()=>classModal(daily)})}else go()});
+   const sv=loadKey(SAVE_KEY);if(sv&&validSave(sv)&&(!sv.over||sv.dying)){openModal(tr('ui_ow_q',(clsById(sv.cls)||CLASSES[0]).n,NUM[sv.depth])+`<div class="row"><button class="btn hot" id="owGo" type="button">${L.ui_ow_go}</button><button class="btn" id="owBack" type="button">${L.ui_back}</button></div>`,false,()=>{$('#owGo').onclick=go;$('#owBack').onclick=()=>classModal(daily)},true)}else go()});
   // 免費版：完整版的職業卡片都是全彩櫥窗，點了打開購買說明（買了就能玩）
   if(!isFull())$('#sheet').querySelectorAll('[data-c]').forEach(b=>{if(clsPaid(b.dataset.c)){b.disabled=false;b.classList.add('paid');b.onclick=()=>fullModal(()=>classModal(daily))}})})}
 function showTitle(){G=null;P=null;FX=[];document.body.classList.add('ontitle');document.body.classList.remove('crit');document.querySelectorAll('.bar.low').forEach(b=>b.classList.remove('low'));renderLog();musMode();
@@ -1699,7 +1708,7 @@ function showTitle(){G=null;P=null;FX=[];document.body.classList.add('ontitle');
   $('#tNew').onclick=()=>classModal(false);$('#tDaily').onclick=()=>classModal(true);$('#tStory').onclick=()=>journalModal(showTitle);$('#tShop').onclick=workshopModal;$('#tHelp').onclick=()=>helpModal(true)})}
 /* ================= 手把（Gamepad API，標準配置；Steam Deck、Xbox、PS 手把都適用） =================
    遊戲中：十字鍵／左搖桿移動（可斜走、按住連續走）、A 互動、B 等待、X 技能、Y 行囊、LB 遮燈、RB 自動探索、
-          LT／RT／L3 快捷欄 1／2／3、View（Back）搜索、Menu（Start）選單
+          LT／RT／L3 快捷欄 1／2／3、View（Back）作用在腳下（樓梯／祭壇／泉水；身旁有醒著的怪也能下樓，同鍵盤 >、點自己那格）、Menu（Start）選單
    視窗中：十字鍵／搖桿移動焦點、A 確定、B 返回 */
 const GP={down:{},held:null,next:0,on:false,focus:null};
 const BACK_IDS=['cBack','sBack','iBack','lgBack','abBack','jBack','hBack','kBack','lBack','pgOk','aNo','fNo','mClose'];
@@ -1714,11 +1723,12 @@ function gpBack(){for(const id of BACK_IDS){const b=document.getElementById(id);
 function gpDir(gp){const b=i=>gp.buttons[i]&&gp.buttons[i].pressed;let dx=(b(15)?1:0)-(b(14)?1:0),dy=(b(13)?1:0)-(b(12)?1:0);
  if(!dx&&!dy){const ax=gp.axes[0]||0,ay=gp.axes[1]||0,m=Math.hypot(ax,ay);if(m>.5){const a=Math.atan2(ay,ax),o=Math.round(a/(Math.PI/4));dx=Math.round(Math.cos(o*Math.PI/4));dy=Math.round(Math.sin(o*Math.PI/4))}}return dx||dy?[dx,dy]:null}
 function gpButton(i){if(VIG){closeVig();return}
- if(modalOpen){if(i===0&&GP.focus&&document.body.contains(GP.focus))GP.focus.click();else if(i===0){const l=gpFocusables();if(l.length)gpSetFocus(l[0])}else if(i===1||i===9)gpBack();return}
+ if(modalOpen){if(i===0&&performance.now()-modalT0<modalGuard)return;   /* 手把 A 是程式呼叫 .click()，click 攔截擋不到，這裡自己擋防誤觸時間 */
+  if(i===0&&GP.focus&&document.body.contains(GP.focus))GP.focus.click();else if(i===0){const l=gpFocusables();if(l.length)gpSetFocus(l[0])}else if(i===1||i===9)gpBack();return}
  if(!G)return;if(auto){auto=null;return}
  switch(i){case 0:doInteract();break;case 1:doMove(0,0);break;case 2:doSkill();break;case 3:if(canAct()){selSock=null;invModal()}break;
   case 4:toggleHood();break;case 5:doExplore();break;case 6:useQuick(0);break;case 7:useQuick(1);break;
-  case 8:doInteract();break;case 9:if(canAct())menuModal();break}}
+  case 8:doInteract(true);break;case 9:if(canAct())menuModal();break}}
 function gpPoll(now){if(!GP.on&&now-(gpPoll.t||0)<1000){requestAnimationFrame(gpPoll);return}gpPoll.t=now;const pads=navigator.getGamepads?[...navigator.getGamepads()]:[];const gp=pads.find(p=>p&&p.connected);
  if(gp){if(!GP.on){GP.on=true;document.body.classList.add('gp');if(G&&!G.over)msg(L.ui_gp_on,'dim')}
   gp.buttons.forEach((bt,i)=>{const pr=bt.pressed||bt.value>.6;if(i>=12&&i<=15){GP.down[i]=pr;return}if(pr&&!GP.down[i])gpButton(i);GP.down[i]=pr});
@@ -1759,38 +1769,45 @@ const testLabel=()=>TESTMODE===1?' · TEST':TESTMODE===2?' · TEST FREE':'';
    購買由原生層提供 window.EmberIAP = {price():Promise<string>, buy():Promise<boolean>, restore():Promise<boolean>}（見 LAUNCH.md）。 */
 const FULL_KEY='ember-abyss-full',FREE_CLS=['blade','lamp'];
 const IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
+if(IS_APP||window.EMBER_WEBLOCK)document.documentElement.classList.add('app');   // 長按圖片不跳系統選單只限 App 與上鎖的測試網址；網頁版照舊可長按存進照片
 function isFull(){if(TESTMODE===1)return true;if(TESTMODE===2)return false;if(!IS_APP&&!window.EMBER_WEBLOCK)return true;   // EMBER_WEBLOCK：測試網址和 App 一樣預設免費版（tools/deploy_test.py）
  try{return localStorage.getItem(FULL_KEY)==='1'}catch(e){return false}}
 const clsPaid=id=>!FREE_CLS.includes(id);
 function setFull(){try{localStorage.setItem(FULL_KEY,'1')}catch(e){}}
-if(IS_APP&&!isFull())setTimeout(()=>{const i=window.EmberIAP;if(i&&i.owned)i.owned().then(ok=>{if(ok)setFull()}).catch(()=>{})},1500);   // 重裝後自動恢復：owned() 不跳任何視窗，只查購買紀錄
+if(IS_APP&&(!isFull()||(window.Capacitor&&Capacitor.getPlatform&&Capacitor.getPlatform()==='android')))setTimeout(()=>{const i=window.EmberIAP;if(i&&i.owned)i.owned().then(ok=>{if(ok)setFull()}).catch(()=>{})},1500);   // Android 已解鎖也查一次：owned() 會順便確認（acknowledge）事後才入帳的交易，否則 Google 三天後自動退款   // 重裝後自動恢復：owned() 不跳任何視窗，只查購買紀錄
 // App 內（WKWebView）不支援 <a download>：點「儲存圖片」改開系統分享面板，玩家自己選「儲存影像」
 // 圖檔在手指按下時就先讀好（WebKit 可能拒絕「按下去之後才 fetch、隔了一次非同步才 share」）；讀好了就在點擊當下直接開分享面板
 const SHF=new Map();
 function shareFile(a){const h=a.getAttribute('href');if(!SHF.has(h)){const o={};o.p=fetch(h).then(r=>r.blob()).then(b=>o.f=new File([b],a.getAttribute('download')||'emberlamp.jpg',{type:b.type||'image/jpeg'})).catch(e=>{SHF.delete(h);throw e});SHF.set(h,o)}return SHF.get(h)}
+function preShare(a){if(!IS_APP||!a)return;const h=a.getAttribute('href');for(const k of [...SHF.keys()])if(k!==h)SHF.delete(k);shareFile(a).p.catch(()=>{})}   // 檢視頁一打開就先讀，只留目前這張（畫廊全部留著會多佔幾十 MB）
 if(IS_APP)document.addEventListener('pointerdown',e=>{const a=e.target.closest&&e.target.closest('a[download]');if(a)shareFile(a).p.catch(()=>{})},true);
 if(IS_APP)document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest('a[download]');if(!a)return;e.preventDefault();e.stopPropagation();
- const fail=err=>{if(err&&err.name==='AbortError')return;a.textContent=L.ui_gal_nosave};
+ const ok=()=>{a.textContent=L.ui_gal_save},fail=err=>{const n=err&&err.name;if(n==='InvalidStateError')return;if(n==='AbortError')return ok();a.textContent=L.ui_gal_nosave};   // 成功／取消就把字改回來；上一個分享面板還開著時再點（InvalidStateError）不算失敗
  const go=f=>{if(navigator.canShare&&navigator.canShare({files:[f]}))return navigator.share({files:[f]});throw new Error('noshare')};
- const o=shareFile(a);if(o.f){try{go(o.f).catch(fail)}catch(err){fail(err)}}else o.p.then(go).catch(fail)},true);
+ const o=shareFile(a);if(o.f){try{go(o.f).then(ok,fail)}catch(err){fail(err)}}else o.p.then(go).then(ok,fail)},true);
 function fullModal(back){
+ if(isFull()){back();return}   // 已在背景解鎖（自動恢復、家長核准後補發）就不再顯示購買頁；TESTMODE===2 時 isFull() 為 false，不受影響
  const iap=window.EmberIAP,dis=TESTMODE===2,NOIAP=IS_APP?L.ui_full_nostore:L.ui_full_noiap;   // App 裡連不上商店時不能說「請在 App 裡購買」
  const FULL_THUMBS=['miko','ferry','shadow','rune','monk','berserk'].filter(id=>GAL[id+'_4']);   // 購買頁：完整版六個職業的畫廊特寫縮圖（燈巫、送燈人放最前面）
  openModal(`<h2>${L.ui_full_title}</h2><p>${L.ui_full_pitch}</p>${FULL_THUMBS.length?`<div class="fthumbs">${FULL_THUMBS.map(id=>`<figure><img alt="" src="${galThumb(id+'_4')}"><figcaption>${clsById(id).n}</figcaption></figure>`).join('')}</div>`:''}<ul class="fulll">${L.ui_full_list}</ul>
   <div class="stack stickyb" style="background:linear-gradient(to bottom,rgba(0,0,0,0),var(--stone) 14px)"><p class="tiny" id="fNote" style="margin:0" aria-live="polite">${iap||dis||IS_APP?'':L.ui_full_noiap}</p><button class="btn hot wide" id="fBuy" type="button">${L.ui_full_buy}<span id="fPrice"></span></button>
   <div class="row" style="justify-content:space-between"><button class="btn small" id="fRestore" type="button">${L.ui_full_restore}</button><button class="btn small" id="fBack" type="button">${L.ui_full_later}</button></div></div>`,false,()=>{
+  let busy=false;const nEl=$('#fNote'),note=s=>{if(nEl&&nEl.isConnected)nEl.textContent=s};   // busy 留在這次的閉包裡：原生端萬一不回應，離開再進購買頁就解鎖；nEl 脫離畫面＝玩家已離開購買頁
   $('#fBack').onclick=back;
-  if(iap&&iap.price)iap.price().then(p=>{if(p)$('#fPrice').textContent=' · '+p}).catch(()=>{});
-  const done=ok=>{if(ok){setFull();if(TESTMODE===2){TESTMODE=0;try{localStorage.setItem('ember-abyss-test','0')}catch(e){}}sfx('level');openModal(`<h2>${L.ui_full_thanks}</h2><p>${L.ui_full_thanks_d}</p><div class="row"><button class="btn hot" id="fOk" type="button">${L.ui_dz_ok}</button></div>`,false,()=>{$('#fOk').onclick=back})}else $('#fNote').textContent=L.ui_full_fail};
-  $('#fBuy').onclick=()=>{if(dis){done(true);return}if(!iap){$('#fNote').textContent=NOIAP;return}$('#fNote').textContent=L.ui_full_wait;iap.buy().then(done).catch(()=>done(false))};
-  $('#fRestore').onclick=()=>{if(dis){done(true);return}if(!iap){$('#fNote').textContent=NOIAP;return}$('#fNote').textContent=L.ui_full_wait;iap.restore().then(ok=>ok?done(true):($('#fNote').textContent=L.ui_full_none)).catch(()=>done(false))}})}
+  if(iap&&iap.price)iap.price().then(p=>{const e=$('#fPrice');if(p&&e)e.textContent=' · '+p}).catch(()=>{});
+  const done=ok=>{busy=false;if(ok){setFull();if(TESTMODE===2){TESTMODE=0;try{localStorage.setItem('ember-abyss-test','0')}catch(e){}}if(!nEl||!nEl.isConnected)return;sfx('level');openModal(`<h2>${L.ui_full_thanks}</h2><p>${L.ui_full_thanks_d}</p><div class="row"><button class="btn hot" id="fOk" type="button">${L.ui_dz_ok}</button></div>`,false,()=>{$('#fOk').onclick=back})}else note(L.ui_full_fail)};
+  $('#fBuy').onclick=()=>{if(busy)return;if(dis){done(true);return}if(!iap){note(NOIAP);return}busy=true;note(L.ui_full_wait);iap.buy().then(done).catch(()=>done(false))};
+  $('#fRestore').onclick=()=>{if(busy)return;if(dis){done(true);return}if(!iap){note(NOIAP);return}busy=true;note(L.ui_full_wait);iap.restore().then(ok=>{if(ok)done(true);else{busy=false;note(L.ui_full_none)}}).catch(()=>done(false))}},true)}
 function aboutModal(back){
  openModal(`<h2>${L.ui_about}</h2><p class="dim" id="abVer" style="margin-top:-4px">${L.app_name} · ${L.ui_version} ${VERSION}${testLabel()}</p>
  ${CREDIT?`<h3>${L.ui_made}</h3><p>${CREDIT}</p>`:''}
  <p>${L.ui_privacy_short}</p><p style="font-size:13px">${L.ui_privacy_link}<br><span style="user-select:all;-webkit-user-select:all">ember.sanbaofang.com/privacy</span><br>${L.ui_support_mail}<br><span style="user-select:all;-webkit-user-select:all">hello@sanbaofang.com</span></p><p class="dim" style="font-size:12px">${L.ui_ai_note}</p>
  <h3>${L.ui_fonts}</h3><p style="font-size:13px;line-height:1.7">${FONT_CREDITS.map(([f,a])=>`${f} — ${a}`).join('<br>')}</p><p class="dim" style="font-size:12px">${L.ui_fonts_note}</p>
- <h3>${L.ui_sfx_title}</h3><p style="font-size:13px;line-height:1.7">Kenney — RPG sounds (CC0)<br>artisticdude — RPG Sound Pack (CC0)</p>${IS_APP?`<h3>Open source</h3><p style="font-size:13px;line-height:1.7">Capacitor (MIT)<br>@capgo/native-purchases (MPL-2.0)<br><span style="user-select:all;-webkit-user-select:all">github.com/Cap-go/capacitor-native-purchases</span></p>`:''}
+ <h3>${L.ui_sfx_title}</h3><p style="font-size:13px;line-height:1.7">Kenney — RPG sounds (CC0)<br>artisticdude — RPG Sound Pack (CC0)</p>${IS_APP?`<h3>${L.ui_oss}</h3><p style="font-size:13px;line-height:1.7">Capacitor (MIT)<br>@capgo/native-purchases (MPL-2.0)<br><span style="user-select:all;-webkit-user-select:all">github.com/Cap-go/capacitor-native-purchases</span></p>`:''}
+ ${errLog().length?`<h3>${L.ui_err_title}</h3><p class="dim" style="font-size:12px">${L.ui_err_hint}</p><pre id="abErr" style="font-size:11px;white-space:pre-wrap;word-break:break-all;user-select:all;-webkit-user-select:all;max-height:9em;overflow:auto">${esc(errLog().map(x=>`[${x.t} v${x.v}] ${x.m} @ ${x.s}`).join('\n'))}</pre><div class="row" style="gap:8px"><button class="btn small" id="abErrCopy" type="button">${L.ui_err_copy}</button><button class="btn small" id="abErrClear" type="button">${L.ui_err_clear}</button></div>`:''}
  <div class="row" style="margin-top:14px"><button class="btn" id="abBack" type="button">${L.ui_back}</button></div>${TESTMODE?`<div class="row" style="margin-top:12px;gap:8px;flex-wrap:wrap"><button class="btn small" id="tRenew" type="button">RENEW：重設工坊與燈城</button><button class="btn small" id="tEmb" type="button">＋1000 餘燼</button></div><p class="tiny" id="tNote"></p>`:''}`,false,()=>{$('#abBack').onclick=back;bindTestTap(()=>aboutModal(back));
+  {const c=$('#abErrCopy');if(c)c.onclick=()=>{const t=$('#abErr').textContent;const ok=()=>{c.textContent=L.ui_err_copied};try{navigator.clipboard.writeText(t).then(ok,()=>{})}catch(e){}}}
+  {const c=$('#abErrClear');if(c)c.onclick=()=>{try{localStorage.removeItem(ERR_KEY)}catch(e){}aboutModal(back)}}
   // 測試用（只在測試模式出現）：工坊強化、燈城全部歸零；或加餘燼
   const tn=t=>{const n=$('#tNote');if(n)n.textContent=t};
   {const b=$('#tRenew');if(b)b.onclick=()=>{const r=loadKey(REC_KEY)||{};r.up={};r.city=[];store(REC_KEY,r);tn('已重設：工坊強化、燈城都歸零（餘燼 '+(r.embers||0)+'）')}}
@@ -2005,13 +2022,13 @@ const VIGQ=[];   // 同時觸發多張插圖時排隊，一次一張
 // 下樓插圖：每一層一張（descend_2 … descend_10）；還沒畫的層用通用那張
 // 燎的最後一句話：打倒燼王後二選一，再加上這個職業專屬的第三個選項；選擇不影響結局
 // 最終頭目倒下：心等玩家說完最後一句話才落地（按住方向、連點不會直接踩上去通關；視窗開著時關掉 App，回來會再問一次）
-function dropHeart(){const p=G&&G.lwPend;if(!p)return;G.lwPend=null;const h={cat:'heart',seen:1};const keep=G.items.filter(i=>i.x===p.x&&i.y===p.y);if(keep.length)dropNear(h,p.x,p.y);else G.items.push(Object.assign(h,{x:p.x,y:p.y}));h.seen=1;save();updateHUD()}
+function dropHeart(){const p=G&&G.lwPend;if(!p)return;G.lwPend=null;const h={cat:'heart',seen:1};const c=[[0,0],...DIRS].map(([dx,dy])=>[p.x+dx,p.y+dy]).find(([a,b])=>passable(a,b)&&!itemAt(a,b)&&!featAt(a,b)&&!(a===P.x&&b===P.y));if(c)G.items.push(Object.assign(h,{x:c[0],y:c[1]}));else G.items.unshift(Object.assign(h,{x:p.x,y:p.y}));h.seen=1;   /* 不落在主角腳下：要看得到、走一步就撿得到 */save();updateHUD()}
 let lwOpen=false;
 function lastWords(){if(!G||G.over||!G.lwPend||lwOpen)return;if(!L.lw_a){dropHeart();return}if(modalOpen||VIG){setTimeout(lastWords,400);return}lwOpen=true
  const opts=['a','b',G.cls].filter(k=>L['lw_'+k]);
  openModal(`<h2>${L.lw_title}</h2><p>${L.t0256}</p><p>${L.lw_cold}</p><div class="stack" style="margin-top:12px">${opts.map(k=>`<button class="choice" type="button" data-lw="${k}"><b style="letter-spacing:.04em">${L['lw_'+k]}</b></button>`).join('')}</div>`,false,()=>{
   $('#sheet').querySelectorAll('[data-lw]').forEach(b=>b.onclick=()=>{const k=b.dataset.lw;const r=loadKey(REC_KEY)||{};r.lastWords=r.lastWords||{};r.lastWords[G.cls]=k;store(REC_KEY,r);
-   openModal(`<h2>${L.lw_title}</h2><div class="story"><p>${L['lw_'+k+'_r']}</p></div><p>${L.lw_end}</p><div class="row"><button class="btn hot" id="lwOk" type="button">${L.ui_city_more}</button></div>`,false,()=>{$('#lwOk').onclick=()=>{closeModal(true);lwOpen=false;dropHeart()}})})})}
+   openModal(`<h2>${L.lw_title}</h2><div class="story"><p>${L['lw_'+k+'_r']}</p></div><p>${L.lw_end}</p><div class="row"><button class="btn hot" id="lwOk" type="button">${L.ui_city_more}</button></div>`,false,()=>{$('#lwOk').onclick=()=>{closeModal(true);lwOpen=false;dropHeart()}},true)})})}
 const VCAM={
  // 一組三個數：畫面中心對準圖上的 x%、y%，放大倍數（0＝拉遠：橫式螢幕到全貌、直式螢幕到剛好滿版；畫廊一律到全貌）；兩組是起點→終點，三組多一個中途點。起終點相同＝靜止（可配局部動態 VFX）
 
@@ -2102,11 +2119,12 @@ function vignette(key,caption,then,ms=2200,sub=''){const src=EVENTS[key]||GAL[ke
 // 怪物頭上的狀態字（z／暈／懼／填）：像素模式畫在圖的頭頂（受傷時在血條上方），亮色加深色描邊；漢字模式維持在字的右上角
 function monMark(m,M,X,Y,t,c,a){const pix=STYLE==='pixel'&&artImg[m.k]&&!M.big;ctx.save();ctx.globalAlpha=a;ctx.lineJoin='round';
  if(pix){const sc=m.k==='guard'?.95:.76,bh=Math.max(3,Math.round(TS*.09)),top=Y+TS*.97-TS*sc*2.25*.9-(m.hp<m.mhp?bh+5:0),fs=Math.round(TS*.46),bob=t==='z'?Math.sin(performance.now()/400)*2:0;
-  ctx.font=`700 ${fs}px ${FONT_G}`;ctx.textAlign='center';ctx.textBaseline='alphabetic';ctx.lineWidth=Math.max(2,TS*.09);ctx.strokeStyle='rgba(10,8,7,.9)';ctx.strokeText(t,X+TS*.5,top-2+bob);ctx.fillStyle=c;ctx.fillText(t,X+TS*.5,top-2+bob)}
+  ctx.font=`700 ${fs}px ${FONT_G}`;ctx.textAlign='center';ctx.textBaseline='alphabetic';ctx.lineWidth=Math.max(2,TS*.09);ctx.strokeStyle='rgba(10,8,7,.9)';const by=Math.max(fs+3,top-2)+bob;ctx.strokeText(t,X+TS*.5,by);ctx.fillStyle=c;ctx.fillText(t,X+TS*.5,by)}   // 地圖最上面一列：基線夾在畫布內，字不畫到上緣外
  else{ctx.font=`700 ${Math.round(TS*.32)}px ${FONT_G}`;ctx.lineWidth=Math.max(2,TS*.07);ctx.strokeStyle='rgba(10,8,7,.85)';const y=Y+TS*.15+(t==='z'?Math.sin(performance.now()/400)*2:0);ctx.strokeText(t,X+TS*.85,y);ctx.fillStyle=c;ctx.fillText(t,X+TS*.85,y)}
  ctx.restore()}
 function closeVig(){if(!VIG)return;if(performance.now()-VIG.t0<400)return;   // 剛出現的 0.4 秒內不算，避免連點移動時誤關
- const{el,then}=VIG;VIG=null;if(VIGQ.length){const a=VIGQ.shift();setTimeout(()=>vignette(...a),300)}el.classList.remove('on');setTimeout(()=>el.remove(),260);if(then)then()}
+ const{el,then}=VIG;VIG=null;if(modalOpen&&then)modalT0=performance.now();   /* 插圖底下已開著視窗（例：同回合死亡的結算）：關圖那一下按久了會穿透到底下的按鈕，重新計時 */
+ if(VIGQ.length){const a=VIGQ.shift();setTimeout(()=>vignette(...a),300)}el.classList.remove('on');setTimeout(()=>el.remove(),260);if(then)then()}
 function preloadVigFonts(){if(!document.fonts||!document.fonts.load||!Object.keys(EVENTS).length)return;
  const fam=getComputedStyle(document.documentElement).getPropertyValue('--f-display')||'serif';
  const txt=[...FLOORS,L.ui_ev_altar,L.ui_ev_fountain,L.ui_ev_grave,L.ui_ev_merchant,L.ui_ev_page,L.ui_ev_note,MON.guard.n,MON.devour.n,MON.king.n].join('');
@@ -2128,7 +2146,7 @@ function atkTarget(){if(!G||G.over)return null;let best=null;
  for(const m of G.mons)if(canShootAt(m)){const d=cheb(m.x,m.y,P.x,P.y);if(d<bd){bd=d;best=m}}return best}
 const BTN_FEAT=k=>k==='merchant'||k==='brazier'||k==='chest'||k==='grave';
 const FEAT_RANK={merchant:0,grave:1,chest:2,brazier:3},FEAT_LABEL={merchant:'ui_act_trade',brazier:'ui_act_light',chest:'ui_act_open',grave:'ui_act_grave'};
-function featTarget(){if(!G||G.over)return null;let best=null;for(const f of G.feats)if(BTN_FEAT(f.kind)&&cheb(f.x,f.y,P.x,P.y)===1&&!(f.kind==='brazier'&&f.lit)&&(!best||FEAT_RANK[f.kind]<FEAT_RANK[best.kind]))best=f;return best}
+function featTarget(){if(!G||G.over)return null;const sb=sealed()&&G.seal.kind==='brazier',rk=f=>sb&&f.kind==='brazier'?-1:FEAT_RANK[f.kind];let best=null;for(const f of G.feats)if(BTN_FEAT(f.kind)&&cheb(f.x,f.y,P.x,P.y)===1&&!(f.kind==='brazier'&&f.lit)&&(!best||rk(f)<rk(best)))best=f;return best}   /* 封印燭台未點完時燭台排在行商前，免得貼著行商的燭台點不到 */
 // 站在樓梯、祭壇、泉水上：腳下的地形優先（身旁的行商、寶箱不會擋住下樓）；只有身旁醒著的怪會讓按鈕維持「攻擊」
 const onUseTile=()=>{const t=tile(P.x,P.y);return t===T.STAIRS||t===T.ALTAR||t===T.FOUNT};
 function actPlan(){const tl=onUseTile();
@@ -2153,8 +2171,10 @@ function autoTick(){
   {const z=G.mons.find(m=>m.hp>0&&m.asleep&&!m.autoSeen&&monVisible(m)&&vis[idx(m.x,m.y)]);if(z){for(const m of G.mons)if(m.asleep&&vis[idx(m.x,m.y)])m.autoSeen=1;msg(tr('ui_auto_sleep',MON[z.k].n),'oil');auto=null;return}}   // 看到睡著的怪物：停下來讓玩家決定（偷襲或繞開），每隻只停一次
   let path=explorePath();
   if(!path&&sealed()&&G.seal.kind==='brazier'){const un=G.feats.filter(f=>f.kind==='brazier'&&!f.lit&&G.seen[idx(f.x,f.y)]);
-   if(un.length){if(un.some(f=>cheb(f.x,f.y,P.x,P.y)===1)){msg(L.ui_auto_light,'ember');auto=null;return}
-    const bp=bfsPath((x,y)=>un.some(f=>cheb(f.x,f.y,x,y)===1));if(bp){if(!auto.toBraz){msg(tr('ui_auto_braz',G.seal.need-G.seal.lit),'ember');auto.toBraz=true}path=bp}}}
+   if(un.length){const canLight=(x,y)=>{const t=tile(x,y);return t!==T.STAIRS&&t!==T.ALTAR&&t!==T.FOUNT&&!featAt(x,y)&&un.some(f=>cheb(f.x,f.y,x,y)===1)},   /* 站得上去、按鈕會是「點燈」的格子：腳下地形與設施格排除 */
+     nearMer=(x,y)=>G.feats.some(f=>f.kind==='merchant'&&cheb(f.x,f.y,x,y)===1);   // 貼著行商的格子盡量不選（舊存檔可能只剩這種格子才退回；那時 featTarget 也會讓燭台排前面）
+    if(canLight(P.x,P.y)){msg(L.ui_auto_light,'ember');auto=null;return}
+    const bp=bfsPath((x,y)=>canLight(x,y)&&!nearMer(x,y))||bfsPath(canLight);if(bp){if(!auto.toBraz){msg(tr('ui_auto_braz',G.seal.need-G.seal.lit),'ember');auto.toBraz=true}path=bp}}}
   if(!path){const onSt=tile(P.x,P.y)===T.STAIRS;if(onSt){msg(sealed()?tr("t0591",sealText()):L["t0592"],'ember');auto=null;return}
    path=bfsPath((x,y)=>tile(x,y)===T.STAIRS);if(!path){msg(G.depth===10?L["t0593"]:L["t0594"],'dim');auto=null;return}
    if(!auto.toStairs){msg(L["t0595"],'dim');auto.toStairs=true}}
@@ -2171,7 +2191,7 @@ const KR={down:0,last:0,first:true};   // 鍵盤長按：第一步後 260ms 才�
 addEventListener('keydown',e=>{
  if(VIG){e.preventDefault();closeVig();return}
  if(e.metaKey||e.ctrlKey||e.altKey)return;
- if(modalOpen){if(e.key==='Escape'){closeModal();e.preventDefault()}return}
+ if(modalOpen){if(e.repeat&&e.key==='Enter'&&e.target.tagName==='BUTTON')e.preventDefault();else if(e.key==='Escape'){closeModal();e.preventDefault()}return}   // 長按 Enter 的連發不替玩家按下聚焦的按鈕（輸入框照常）
  if(!G)return;const k=e.key.length===1?e.key.toLowerCase():e.key;
  if(auto){auto=null;e.preventDefault();return}
  if(KEYS[k]){e.preventDefault();const t=performance.now();
@@ -2187,7 +2207,7 @@ addEventListener('keydown',e=>{
  if(k==='i'){e.preventDefault();if(canAct()){selSock=null;invModal()}return}
  if(k==='Escape'){if(canAct())menuModal()}});
 $('#modal').addEventListener('click',e=>{if(e.isTrusted&&performance.now()-modalT0<modalGuard){e.stopPropagation();e.preventDefault()}},true);
-$('#bExplore').onclick=doExplore;$('#bAct').onclick=()=>doInteract();   // 不要把點擊事件當成 self 傳進去$('#pHood').onclick=toggleHood;$('#bHoodS').onclick=toggleHood;$('#bSkill').onclick=doSkill;$('#bHood').onclick=toggleHood;
+$('#bExplore').onclick=doExplore;$('#bAct').onclick=()=>doInteract();   /* 不要把點擊事件當成 self 傳進去 */$('#pHood').onclick=toggleHood;$('#bHoodS').onclick=toggleHood;$('#bSkill').onclick=doSkill;$('#bHood').onclick=toggleHood;
 $('#bInv').onclick=()=>{if(canAct()){selSock=null;invModal()}};$('#bMenu').onclick=()=>{if(canAct())menuModal()};$('#log').onclick=()=>{if(canAct())logModal()};
 // 方向盤：可長按
 let padT=null,padI=null;
@@ -2241,7 +2261,7 @@ cv.addEventListener('pointerup',e=>{if(!ptr||!canAct()){ptr=null;return}const dx
 function tapTile(x,y){if(!inb(x,y))return;
  if(x===P.x&&y===P.y){doInteract(true);return}
  const m=monAt(x,y);
- if(m&&monVisible(m)){if(cheb(x,y,P.x,P.y)===1){doMove(x-P.x,y-P.y);return}
+ if(m&&(monVisible(m)||(m.asleep&&m.zSeen&&!MON[m.k].big))){   // 看過還在睡的怪留下的暗影：和看得見的怪一樣，點了只顯示說明if(cheb(x,y,P.x,P.y)===1){doMove(x-P.x,y-P.y);return}
   if(G.cls==='miko'&&canShootAt(m)&&canAct()){if(P.rl>0){msg(L.ui_miko_reload,'dim');return}auto=null;shootAt(m);return}const M=MON[m.k];msg(tr("t0596",M.n,m.hp,m.mhp,M.desc,m.asleep?L["t0597"]:''),M.c);return}
  if(cheb(x,y,P.x,P.y)===1){doMove(x-P.x,y-P.y);return}
  if(!G.seen[idx(x,y)])return;
